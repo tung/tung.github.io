@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+
+{% block title %}Posts for &apos;{{ term.name }}&apos; | {% endblock %}
+
+{% block feeds %}
+  {{ super() }}
+  {% set term_feed_path = taxonomy.name ~ "/" ~ term.name ~ "/atom.xml" %}
+  <link rel="alternate" type="application/atom+xml" title="{{ config.title }} - {{ term.name }}" href="{{ get_url(path=term_feed_path, trailing_slash=false) }}">
+{% endblock %}
+
+{% block content %}
+  <h1>Posts for &apos;{{ term.name }}&apos;</h1>
+  <br>
+  <p><a href="..">&LeftArrow; Back to {{ taxonomy.name }}</a></p>
+
+  {% for _, pages in term.pages | group_by(attribute="year") %}
+    <br>
+    {% for page in pages %}
+      <p class="fullwidth">
+        <a href="{{ page.path }}">{{ page.title }}</a>
+        <br>
+        {{ macros::page_meta(page=page, tag="span") }}
+      </p>
+    {% endfor %}
+  {% endfor %}
+{% endblock %}

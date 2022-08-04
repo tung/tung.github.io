@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="{{ config.description }}">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{% endblock %}{{ config.title }}</title>
+  <link rel="icon" href="{{ get_url(path='favicon.png') }}" type="image/png" sizes="any">
+  <link rel="stylesheet" href="{{ get_url(path='tufte.css') }}">
+  <link rel="stylesheet" href="{{ get_url(path='site.css') }}">
+  {% block feeds %}
+    <link rel="alternate" type="application/atom+xml" title="{{ config.title }}" href="{{ get_url(path="atom.xml", trailing_slash=false) }}">
+  {% endblock %}
+</head>
+
+<body>
+  <header>
+    <div class="home">
+      <a href="{{ config.base_url | safe }}">{{ config.title }}</a>
+    </div>
+    <nav>
+      <a href="{{ get_url(path="@/posts/_index.md") }}">Posts</a>
+      <a href="{{ config.base_url ~ "/tags/" }}">Tags</a>
+      <a href="{{ get_url(path="@/projects/_index.md") }}">Projects</a>
+      <a href="https://github.com/tung">GitHub</a>
+    </nav>
+    <div style="clear: both"></div>
+  </header>
+{#
+  <details>
+    <summary>__tera_context</summary>
+    <pre style="color: #fff; background-color: #000;">{{ __tera_context | escape | safe }}</pre>
+  </details>
+#}
+  {% block content %}{% endblock %}
+  <footer>
+    Made with <a href="https://www.getzola.org">Zola</a>.
+  </footer>
+</body>
+
+</html>

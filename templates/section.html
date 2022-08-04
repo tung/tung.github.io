@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+
+{% macro page_summary(page) %}
+  <article>
+    <h2><a href="{{ page.path }}">{{ page.title }}</a></h2>
+    {{ macros::page_meta(page=page) }}
+    {% if page.summary %}
+      {{ macros::summary_with_link(text=page.summary, link=page.path) }}
+    {% else %}
+      {{ page.content | safe }}
+    {% endif %}
+  </article>
+{% endmacro %}
+
+{%- macro paginator_link(cond, path, text) -%}
+  {%- if cond -%}
+    <div><a href="{{ path }}">{{ text | safe }}</a></div>
+  {%- else -%}
+    <div class="inactive">{{ text | safe }}</div>
+  {%- endif -%}
+{%- endmacro -%}
+
+{% block title %}{{ section.title }} | {% if paginator and paginator.current_index > 1 %}Page {{ paginator.current_index }} of {{ paginator.number_pagers }} | {% endif %}{% endblock %}
+
+{% block feeds %}
+  {{ super() }}
+  <link rel="alternate" type="application/atom+xml" title="{{ config.title }} - {{ section.title }}" href="{{ section.path ~ "atom.xml" }}">
+{% endblock %}
+
+{% block content %}
+  <h1>{{ section.title }}</h1>
+
+  {% for page in section.pages %}
+    {{ self::page_summary(page=page) }}
+  {% else %}
+    {% for page in paginator.pages %}
+      {{ self::page_summary(page=page) }}
+    {% endfor %}
+    <nav id="pagination" class="bottom-nav" style="text-align: center">
+      {{ self::paginator_link(cond=paginator.previous, path=section.path, text="&Lt; Newest") }}
+      {{ self::paginator_link(cond=paginator.previous, path=paginator.previous, text="&lt; Newer") }}
+      <div>Page {{ paginator.current_index }} of {{ paginator.number_pagers }}</div>
+      {{ self::paginator_link(cond=paginator.next, path=paginator.next, text="Older &gt;") }}
+      {{ self::paginator_link(cond=paginator.next, path=paginator.last, text="Oldest &Gt;") }}
+    </nav>
+  {% endfor %}
+{% endblock %}

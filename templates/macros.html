@@ -1,0 +1,50 @@
+{% macro page_meta(page, tag="p") %}
+  {%- set has_taxo_terms = page.taxonomies | length > 0 %}
+  {%- if page.date or has_taxo_terms %}
+    <{{ tag }} class="meta">
+      {%- if page.date %}
+        Posted on {{ page.date }}
+      {%- endif %}
+      {%- if page.updated %}
+        {%- if page.date %}, {% endif %}
+        Updated {{ page.updated }}
+      {%- endif %}
+      {%- if has_taxo_terms %}
+        {%- if page.date or page.updated %}; {% endif %}
+        Tags:
+        <span class="tags">
+          {%- for term, values in page.taxonomies %}
+            {%- for value in values %}
+              <a href="{{ get_taxonomy_url(kind=term, name=value) }}">{{ value }}</a>{% if not loop.last %},{% endif %}
+            {%- endfor %}
+          {%- endfor %}
+        </span>
+      {%- endif %}
+    </{{ tag }}>
+  {%- endif %}
+{%- endmacro %}
+
+{% macro summary_with_link(text, link) %}
+  {%- set summary = text | trim_end %}
+  {%- if summary is not ending_with("</p>") %}
+    {{ summary | trim_end_matches(pat=".") | trim_end_matches(pat=".") | trim_end_matches(pat=".") | safe -}}
+    ... <a class="meta" href="{{ link }}">(Read more)</a></p>
+  {%- else %}
+    {{ summary | safe }}
+    <p class="meta"><a href="{{ link }}">(Read more)</a></p>
+  {%- endif %}
+{% endmacro %}
+
+{% macro fuzzy_year(date_string) %}
+  {%- set date_parts = date_string | split(pat="-") %}
+  {%- set date_year = date_parts[0] %}
+  {%- set date_month = date_parts[1] | trim_start_matches(pat="0") | int %}
+  {%- if date_month <= 4 %}
+    Early
+  {%- elif date_month <= 8 %}
+    Mid
+  {%- else %}
+    Late
+  {%- endif %}
+  {{ date_year }}
+{% endmacro %}

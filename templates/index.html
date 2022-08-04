@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+
+{% block content %}
+<article>
+  <h1>{{ config.title }}</h1>
+  <p class="subtitle">{{ config.description }}</p>
+
+  <h2>Welcome!</h2>
+  <p>
+    Hi!
+    This is my blog.
+    Feel free to check out some of my <a href="{{ get_url(path="@/posts/_index.md") }}">posts</a>,
+    the <a href="{{ get_url(path="@/projects/_index.md") }}">projects</a> I've worked on
+    and my <a href="https://github.com/tung">GitHub</a>.
+  </p>
+
+  <h2>Recent Posts</h2>
+  {% set posts_section = get_section(path="posts/_index.md") %}
+  {% for post in posts_section.pages | slice(end=5) %}
+    <p class="fullwidth">
+      <a href="{{ post.path }}">{{ post.title }}</a>
+      <br>
+      {{ macros::page_meta(page=post, tag="span") }}
+    </p>
+  {% endfor %}
+  <p><a href="{{ get_url(path="@/posts/_index.md") }}">More {{ posts_section.title }} &RightArrow;</a></p>
+</article>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+
+{% block title %}{{ page.title }} | {% endblock %}
+
+{% block content %}
+  <article>
+    <h1>{{ page.title }}</h1>
+    {% if page.extra.subtitle %}
+      <p class="subtitle">{{ page.extra.subtitle }}</p>
+    {% endif %}
+    {{ macros::page_meta(page=page) }}
+    <br>
+    {{ page.content | safe }}
+    {% if page.extra.discussions %}
+      <br><br>
+      <p>Discussions:
+        {% for discussion in page.extra.discussions %}
+          {%- if not loop.first %}, {% endif %}
+          <a href="{{ discussion.link | safe }}">{{ discussion.text }}</a>
+        {%- endfor %}
+      </p>
+    {% endif %}
+  </article>
+  <nav class="bottom-nav">
+    {% if page.later %}
+      <p>Next: <a href="{{ page.later.path }}">{{ page.later.title }}</a></p>
+    {% endif %}
+    {% if page.earlier %}
+      <p>Previous: <a href="{{ page.earlier.path }}">{{ page.earlier.title }}</a></p>
+    {% endif %}
+    {% set section = get_section(path=page.ancestors | last) %}
+    <p><a href="..">&LeftArrow; More {{ section.title }}</a></p>
+  </nav>
+{% endblock %}

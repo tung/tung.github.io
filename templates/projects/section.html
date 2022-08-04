@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% import "macros.html" as macros %}
+
+{% block title %}{{ section.title }} | {% endblock %}
+
+{% block content %}
+  <h1>{{ section.title }}</h1>
+
+  {% for page in section.pages %}
+    <article>
+      <h2><a href="{{ page.path }}">{{ page.title }}</a></h2>
+      <p>
+        <strong>Role:</strong>
+        {{ page.extra.role }}
+      </p>
+      <p>
+        <strong>Last involved:</strong>
+        {{ macros::fuzzy_year(date_string=page.updated) }}
+      </p>
+      {% if page.summary %}
+        {{ macros::summary_with_link(text=page.summary, link=page.path) }}
+      {% else %}
+        {{ page.content | safe }}
+      {% endif %}
+    </article>
+  {% endfor %}
+{% endblock %}
