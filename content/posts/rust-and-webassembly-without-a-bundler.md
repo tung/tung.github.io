@@ -1,5 +1,6 @@
 +++
 date = 2022-08-04
+updated = 2022-08-05
 title = "Rust and WebAssembly without a Bundler"
 taxonomies.tags = ["javascript", "programming", "rust", "webassembly", "webdev"]
 +++
@@ -37,7 +38,7 @@ However, if it does, we can generally assume the presence of other things like [
 
 This method uses [`WebAssembly.instantiate`](https://caniuse.com/mdn-javascript_builtins_webassembly_instantiate), which is supported by all versions of Chrome, Firefox and Safari that also support WebAssembly.
 
-We'll create a new Rust project that gets JavaScript to call a Rust function that in turn calls a JavaScript function, then have JavaScript call another Rust function:
+We'll create a new Rust project that gets JavaScript to call a Rust `main` function that in turn calls a JavaScript-defined `log_number` function, then have JavaScript call another Rust function named `add`:
 
 ```
 cargo new wasm-instantiate
