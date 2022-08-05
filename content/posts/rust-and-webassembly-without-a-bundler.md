@@ -3,6 +3,9 @@ date = 2022-08-04
 updated = 2022-08-05
 title = "Rust and WebAssembly without a Bundler"
 taxonomies.tags = ["javascript", "programming", "rust", "webassembly", "webdev"]
+extra.discussions = [
+  { text = "/r/rust", link="https://reddit.com/r/rust/comments/wgpg88/rust_and_webassembly_without_a_bundler/" },
+]
 +++
 
 If you're just getting into compiling your Rust code into WebAssembly and want to load it in a web browser, you might be taken aback by the multitude of ways of doing so.
