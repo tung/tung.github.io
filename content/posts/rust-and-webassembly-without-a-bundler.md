@@ -1,6 +1,6 @@
 +++
 date = 2022-08-04
-updated = 2022-08-05
+updated = 2022-08-06
 title = "Rust and WebAssembly without a Bundler"
 taxonomies.tags = ["javascript", "programming", "rust", "webassembly", "webdev"]
 extra.discussions = [
@@ -348,7 +348,7 @@ We want to load the `web.js` in our web page.
   </head>
   <body>
     <script type="module">
-      import init, { add } = from './web.js';
+      import init, { add } from './web.js';
 
       async function run() {
         await init();
