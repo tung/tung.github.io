@@ -1,5 +1,6 @@
 +++
 date = 2022-12-24
+updated = 2022-12-26
 title = "My Workflow for following Crafting Interpreters"
 taxonomies.tags = ["c", "linux", "make", "programming", "testing"]
 +++
@@ -192,8 +193,12 @@ mode_dir = ...
 # e.g. build/debug/deps/
 deps_dir = $(mode_dir)deps/
 
+# e.g. build/debug/objs/
+objs_dir = $(mode_dir)objs/
+
 c_srcs = $(wildcard $(src_dir)*.c)
 c_deps = $(c_srcs:$(src_dir)%.c=$(deps_dir)%.d)
+c_objs = $(c_srcs:$(src_dir)%.c=$(objs_dir)%.o)
 
 # Generate *.d files from *.c files.
 $(c_deps): $(deps_dir)%.d: $(src_dir)%.c
@@ -202,13 +207,9 @@ $(c_deps): $(deps_dir)%.d: $(src_dir)%.c
 # Read in *.d files; generate them if they don't exist yet.
 -include $(c_deps)
 
-# e.g. build/debug/objs/
-objs_dir = $(mode_dir)objs/
-
-c_objs = $(c_srcs:$(src_dir)%.c=$(objs_dir)%.o)
-
+# Generate *.o files from *.c files.
 $(c_objs): $(objs_dir)%.o: $(src_dir)%.c
->$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c -o $@ $<
 ```
 
 There's some Makefile voodoo going on up there, which I'll try to explain.
