@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+	<title>Tung&#x27;s Word Box - chip-8</title>
+	<subtitle>Programming, game development and other technical tidbits</subtitle>
+	<link href="https://tung.github.io/tags/chip-8/atom.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://tung.github.io"/>
+	<generator uri="https://www.getzola.org/">Zola</generator>
+	<updated>2023-02-07T00:00:00+00:00</updated>
+	<id>https://tung.github.io/tags/chip-8/atom.xml</id>
+	<entry xml:lang="en">
+		<title>Making a CHIP-8 Interpreter: chip8run</title>
+		<published>2023-02-07T00:00:00+00:00</published>
+		<updated>2023-02-07T00:00:00+00:00</updated>
+		<link rel="alternate" href="https://tung.github.io/posts/making-a-chip-8-interpreter-chip8run/" type="text/html"/>
+		<id>https://tung.github.io/posts/making-a-chip-8-interpreter-chip8run/</id>
+		<content type="html">&lt;p&gt;I wanted to try my hand at making interactive graphical applications with C, WebAssemnbly and the &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;floooh&#x2F;sokol&quot;&gt;Sokol&lt;&#x2F;a&gt; header-only libraries when I stumbled across the &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;CHIP-8&quot;&gt;CHIP-8&lt;&#x2F;a&gt;.
+Creating a CHIP-8 interpreter (&amp;quot;emulator&amp;quot;) was as good an excuse as any to scratch my itch, and a little while later I ended up with &lt;a href=&quot;https:&#x2F;&#x2F;tung.github.io&#x2F;chip8run&#x2F;&quot;&gt;&lt;strong&gt;chip8run&lt;&#x2F;strong&gt;&lt;&#x2F;a&gt;, which you can try online right now.&lt;&#x2F;p&gt;
+&lt;span id=&quot;continue-reading&quot;&gt;&lt;&#x2F;span&gt;&lt;h2 id=&quot;what-is-chip-8&quot;&gt;&lt;a class=&quot;zola-anchor&quot; href=&quot;#what-is-chip-8&quot; aria-label=&quot;Anchor link for: what-is-chip-8&quot;&gt;&amp;num;&lt;&#x2F;a&gt;
+What is CHIP-8?&lt;&#x2F;h2&gt;
+&lt;p&gt;I suppose I&#x27;m getting ahead of myself.
+CHIP-8 is a description of bytecode format for the creation of video games for home computers made in the 1970s and 1980s.
+The idea is that you could write CHIP-8 bytecode as raw bytes to instruct a processor to do things with a 64-by-32 pixel monochrome display, while reading input from a 16-key hexadecimal keypad.
+This was all that was needed to create simple video games that could run on CHIP-8 interpreters that were made for home computers such as the COSMAC VIP and DREAM 6800.&lt;&#x2F;p&gt;
+&lt;p&gt;Nowadays, CHIP-8 still has games and demos written for it.
+Here&#x27;s some good links:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;johnearnest.github.io&#x2F;chip8Archive&#x2F;&quot;&gt;John Earnest&#x27;s CHIP-8 Archive&lt;&#x2F;a&gt; - Lots of CHIP-8 games and demos.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;http:&#x2F;&#x2F;johnearnest.github.io&#x2F;Octo&#x2F;&quot;&gt;Octo&lt;&#x2F;a&gt; - An online CHIP-8 IDE.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;http:&#x2F;&#x2F;octojam.com&quot;&gt;OctoJam&lt;&#x2F;a&gt; - A CHIP-8 themed game jam.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;a href=&quot;https:&#x2F;&#x2F;chip-8.github.io&#x2F;links&#x2F;&quot;&gt;Awesome CHIP-8&lt;&#x2F;a&gt; - Curated list of CHIP-8 resources.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h2 id=&quot;chip8run&quot;&gt;&lt;a class=&quot;zola-anchor&quot; href=&quot;#chip8run&quot; aria-label=&quot;Anchor link for: chip8run&quot;&gt;&amp;num;&lt;&#x2F;a&gt;
+chip8run&lt;&#x2F;h2&gt;
+&lt;p&gt;Try chip8run online: &lt;a href=&quot;https:&#x2F;&#x2F;tung.github.io&#x2F;chip8run&#x2F;&quot;&gt;https:&#x2F;&#x2F;tung.github.io&#x2F;chip8run&#x2F;&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;chip8run was created as an excuse to try using Sokol to create an interactive WebAssembly program.
+I spent some time beforehand recreating part of the LearnOpenGL tutorials by &lt;a href=&quot;https:&#x2F;&#x2F;www.geertarien.com&#x2F;learnopengl-examples-html5&#x2F;&quot;&gt;following along in geertarien&#x27;s footsteps&lt;&#x2F;a&gt;.
+With some experience in hand, it didn&#x27;t take long before chip8run emerged.&lt;&#x2F;p&gt;
+&lt;p&gt;Sokol ended up being quite nice to work with overall.
+The combination of pipelines, bindings and Sokol&#x27;s shader cross-compiler made it easy to work with graphics hardware the way I wanted to.
+The documentation in the header files and example code made it easy to add useful features like off-thread file loading and drag-and-drop support (try dragging a &lt;code&gt;.ch8&lt;&#x2F;code&gt; file into the browser version).&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;tips-for-making-a-chip-8-interpreter&quot;&gt;&lt;a class=&quot;zola-anchor&quot; href=&quot;#tips-for-making-a-chip-8-interpreter&quot; aria-label=&quot;Anchor link for: tips-for-making-a-chip-8-interpreter&quot;&gt;&amp;num;&lt;&#x2F;a&gt;
+Tips for Making a CHIP-8 Interpreter&lt;&#x2F;h2&gt;
+&lt;p&gt;Having done this, I have a few bits of advice for people looking to write their own CHIP-8 interpreter.&lt;&#x2F;p&gt;
+&lt;p&gt;Check out the Awesome CHIP-8 link above and use &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;Timendus&#x2F;chip8-test-suite&quot;&gt;Timendus&#x27;s CHIP-8 Test Suite&lt;&#x2F;a&gt; to slowly work through individual opcodes.
+The readme of that test suite says how all the screens should work when everything is working properly.&lt;&#x2F;p&gt;
+&lt;p&gt;When drawing sprites, modern CHIP-8 games expect both &lt;em&gt;x&lt;&#x2F;em&gt; and &lt;em&gt;y&lt;&#x2F;em&gt; wrapping; that is, sprites that intersect the right and bottom of the screen should have the rest of the sprite appear on the other side of the screen.
+This technically deviates from the behavior of the CHIP-8 interpreter on the COSMAC VIP, but modern CHIP-8 games are often very buggy unless you do this.
+If you&#x27;re feeling ambitious, you can make this a quirk that can be toggled, otherwise opt for wrapping.&lt;&#x2F;p&gt;
+&lt;p&gt;Some games have pretty intense flicker; chip8run deals with this by fading bright pixels out over time instead of immediately rendering them dark.
+If you&#x27;re making your own CHIP-8 interpreter, you may want to do the same.&lt;&#x2F;p&gt;
+&lt;p&gt;Making a CHIP-8 interpreter is a pretty good way to try out a game library or framework.
+John Earnest&#x27;s CHIP-8 Archive linked above is a good place to find games and demos to try out once you want to move beyond testing.&lt;&#x2F;p&gt;
+</content>
+	</entry>
+</feed>
