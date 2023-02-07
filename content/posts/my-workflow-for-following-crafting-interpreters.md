@@ -12,6 +12,8 @@ This post is about how I approached the last part.
 The book doesn't recommend any specific setup or workflow, so you're free to go with whatever you like.
 The rest of this post describes what I went with; all of the code can be found here: <https://github.com/tung/clox>
 
+<!-- more -->
+
 ## Goals
 
 _Crafting Interpreters_ has every line of code needed to create _clox_, the C bytecode VM for the Lox language, and it'd be easy to just type it all in and nod along.
