@@ -2,7 +2,7 @@
 title = "DynaHack"
 updated = 2016-02-18
 weight = 20
-extra.role = "Creator and lead developer."
+extra.role = "Creator and main developer."
 +++
 
 DynaHack is a variant of [NetHack](@/projects/nethack.md), the classic dungeon-delving roguelike experience.

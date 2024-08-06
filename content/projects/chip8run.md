@@ -1,7 +1,7 @@
 +++
 title = "chip8run"
 updated = 2023-02-07
-extra.role = "Creator and lead developer"
+extra.role = "Creator and main developer."
 +++
 
 chip8run is an interpreter (or "emulator") for CHIP-8: a bytecode format for the creation of video games for home computers made in the 1970s and 1980s like the COSMAC VIP.

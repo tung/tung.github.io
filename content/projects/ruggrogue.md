@@ -2,7 +2,7 @@
 title = "RuggRogue"
 updated = 2022-07-06
 weight = 10
-extra.role = "Creator and lead developer."
+extra.role = "Creator and main developer."
 +++
 
 RuggRogue is a simple web-playable roguelike game made with Rust and SDL, with Emscripten for the browser port.
