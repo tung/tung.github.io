@@ -10,7 +10,7 @@ build_search_index = false
 title = "Tung's Word Box"
 description = "Programming, game development and other technical tidbits"
 
-generate_feed = true
+generate_feeds = true
 
 ignored_content = [".*.swp"]
 
@@ -19,7 +19,11 @@ taxonomies = [
 ]
 
 [link_checker]
+skip_anchor_prefixes = [
+  "https://github.com/",
+]
 internal_level = "warn"
+external_level = "warn"
 
 [markdown]
 # Whether to do syntax highlighting
