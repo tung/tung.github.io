@@ -5,7 +5,15 @@ weight = 20
 extra.role = "Creator and main developer."
 +++
 
-DynaHack is a variant of [NetHack](@/projects/nethack.md), the classic dungeon-delving roguelike experience.
+{{ resize_image(
+  path="/projects/dynahack/dynahack-screenshot.png",
+  alt="DynaHack screenshot",
+  width=640,
+  height=480,
+  op="fit"
+) }}
+
+DynaHack is a variant of [NetHack](@/projects/nethack/index.md), the classic dungeon-delving roguelike experience.
 It aims to modernize core aspects of the gameplay and interface by merging innovations from other NetHack variants with a broad swathe of minor improvements to many other aspects of the game.
 
 The NetHack variants that influenced DynaHack the most are:

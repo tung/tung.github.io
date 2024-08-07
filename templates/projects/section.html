@@ -6,6 +6,11 @@
 {% block content %}
   <h1>{{ section.title }}</h1>
 
+  <p style="width: 55%">
+    Here's a list of projects I've worked on over the years, mostly related to open source computer games.
+    My involvement with them ranges from minor contributions to full ownership and development.
+  </p>
+
   {% for page in section.pages %}
     <article>
       <h2><a href="{{ page.path }}">{{ page.title }}</a></h2>

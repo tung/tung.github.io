@@ -5,6 +5,14 @@ weight = 10
 extra.role = "Creator and main developer."
 +++
 
+{{ resize_image(
+  path="/projects/ruggrogue/ruggrogue-screenshot.png",
+  alt="RuggRogue screenshot",
+  width=640,
+  height=480,
+  op="fit"
+) }}
+
 RuggRogue is a simple web-playable roguelike game made with Rust and SDL, with Emscripten for the browser port.
 
 Features:
@@ -14,7 +22,7 @@ Features:
 - Choose between graphical tiles and ASCII display.
 - Menu-based UI with hot keys.
 - Auto-run to quickly follow corridors and cross open space.
-- Save and load system
+- Save and load system.
 - New Game Plus mode!
 
 The source code is complemented by the [RuggRogue Source Code Guide](https://tung.github.io/ruggrogue/source-code-guide/); a 23-chapter technical web book covering the ideas, algorithms and structure of the code.

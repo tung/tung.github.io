@@ -5,6 +5,14 @@ weight = 60
 extra.role = "Upstream bug fixes; developed mods in personal fork."
 +++
 
+{{ resize_image(
+  path="/projects/cataclysm-dda/cataclysm-dda-0.g-screenshot.png",
+  alt="Cataclysm: Dark Days Ahead 0.G screenshot",
+  width=640,
+  height=480,
+  op="fit"
+) }}
+
 Cataclysm: Dark Days Ahead is a turn-based survival game set in a post-apocalyptic world.
 Players must explore and survive while defending against zombies and countless other monstrosities in a limitless, procedurally-generated world.
 Items can be scavenged and crafted; structures built; farms cultivated; vehicles repaired and modified.

@@ -5,6 +5,14 @@ weight = 80
 extra.role = "Salvaged inactive project to build on modern systems."
 +++
 
+{{ resize_image(
+  path="/projects/deadcold/deadcold-screenshot.png",
+  alt="DeadCold screenshot",
+  width=640,
+  height=480,
+  op="fit"
+) }}
+
 DeadCold is a science-fiction roguelike by Joseph Hewitt set in an abandoned space station overrun by monsters, malfunctioning robots and other lurking horrors.
 The stranded player can take on one of ten different roles, each with their own specialties and weaknesses.
 Offering necrology services, the player must navigate the different sectors of the DeadCold space station, parts of which have depressurized, to piece together clues from computer logs and journals if they are to have any hope of escaping alive.

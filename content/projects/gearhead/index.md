@@ -5,6 +5,14 @@ weight = 50
 extra.role = "Patch and content contributions."
 +++
 
+{{ resize_image(
+  path="/projects/gearhead/gearhead-screenshot.png",
+  alt="GearHead screenshot",
+  width=640,
+  height=480,
+  op="fit"
+) }}
+
 GearHead is a science-fiction roguelike game by Joseph Hewitt that takes place on Earth in the future where people pilot giant robots ("mechas").
 It features extensive part-based mecha customization, giant robot and on-foot combat, a multi-faceted character skill system and a rich open world environment with randomly-generated quests and plots.
 

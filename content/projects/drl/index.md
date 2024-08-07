@@ -5,6 +5,14 @@ weight = 70
 extra.role = "Developed mods in personal fork."
 +++
 
+{{ resize_image(
+  path="/projects/drl/drl-screenshot.png",
+  alt="DRL screenshot",
+  width=640,
+  height=480,
+  op="fit"
+) }}
+
 DRL is a fast-paced run-and-gun roguelike by Kornel Kisielewicz about a soldier sent to stop an outbreak of hellish demons on a remote moon base.
 The player wades into the chaos as one of three combat roles, gaining traits while increasing levels to unlock new perks and abilities.
 An arsenal of brutal weapons and firearms can be tweaked with custom mod packs, or even transformed into new arnaments entirely.

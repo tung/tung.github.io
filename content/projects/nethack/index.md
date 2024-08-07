@@ -5,6 +5,14 @@ weight = 30
 extra.role = "Upstream bug fixes; developed mods in various personal forks."
 +++
 
+{{ resize_image(
+  path="/projects/nethack/nethack-343-screenshot.png",
+  alt="NetHack screenshot",
+  width=640,
+  height=480,
+  op="fit"
+) }}
+
 NetHack is a classic fantasy roguelike game; one of the most famous and venerable of its kind, with scores of contributors over a development history stretching back to its first release in 1987.
 The player takes on the role of an adventurer sent on a divine quest to retrieve the fabled Amulet of Yendor, hidden deep in the firey pits of Gehennom below the perilous and ever-shifting Dungeons of Doom.
 
@@ -31,7 +39,7 @@ The current version of NetHack includes a couple of bug fixes that can be attrib
 - An important improvement to pathfinding for fleeing monsters in narrow corridors.
 - A fix for confusion over the ownership of items in containers dropped by the player in a shop.
 
-My NetHack variant [DynaHack](@/projects/dynahack.md) is credited in the official [NetHack Guidebook](https://nethack.org/v366/Guidebook.html) as one of the variants that helped maintain interest in NetHack during the long release cycle spanning NetHack 3.4.3 in 2003 and NetHack 3.6.0 in 2015.
+My NetHack variant [DynaHack](@/projects/dynahack/index.md) is credited in the official [NetHack Guidebook](https://nethack.org/v366/Guidebook.html) as one of the variants that helped maintain interest in NetHack during the long release cycle spanning NetHack 3.4.3 in 2003 and NetHack 3.6.0 in 2015.
 
 ## Personal Forks
 

@@ -5,6 +5,14 @@ weight = 90
 extra.role = "Minor bug fixes in personal fork."
 +++
 
+{{ resize_image(
+  path="/projects/dungeon-monkey-eternal/dungeon-monkey-eternal-screenshot.png",
+  alt="Dungeon Monkey Eternal screenshot",
+  width=640,
+  height=480,
+  op="fit"
+) }}
+
 Dungeon Monkey Eternal is a party-based fantasy roguelike role-playing game by Joseph Hewitt.
 The player controls a group of up to four adventurers that band together to take on quests that are randomly generated.
 Gameplay takes place in a 2D isometric perspective with full support for mouse control.

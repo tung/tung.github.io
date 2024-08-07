@@ -5,6 +5,14 @@ weight = 40
 extra.role = "Linux port maintainer, documentation writer."
 +++
 
+{{ resize_image(
+  path="/projects/sphere-rpg-engine/sphere-1.6-ide-screenshot.png",
+  alt="Sphere RPG Engine 1.6 IDE screenshot",
+  width=640,
+  height=480,
+  op="fit"
+) }}
+
 Sphere is an open source game engine made to facilitate the creation of 2D role-playing games.
 It consists of two parts: an editor to help create games, and an engine that runs them.
 

@@ -1,0 +1,4 @@
+{% set image = resize_image(path=path, width=width, height=height, op=op) %}
+<figure>
+  <a href="{{ path }}"><img src="{{ image.url }}"{% if alt %} alt="{{ alt | escape }}" title="{{ alt | escape }}"{% endif %}></a>
+</figure>
