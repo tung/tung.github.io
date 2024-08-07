@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title>Tung&#x27;s Word Box - vim</title>
+    <subtitle>Programming, game development and other technical tidbits</subtitle>
+    <link rel="self" type="application/atom+xml" href="https://tung.github.io/tags/vim/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://tung.github.io"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2022-07-29T00:00:00+00:00</updated>
+    <id>https://tung.github.io/tags/vim/atom.xml</id>
+    <entry xml:lang="en">
+        <title>TOML Syntax Highlighting for Zola Front Matter in Vim</title>
+        <published>2022-07-29T00:00:00+00:00</published>
+        <updated>2022-07-29T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              tungtn
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://tung.github.io/posts/toml-syntax-highlighting-for-zola-front-matter-in-vim/"/>
+        <id>https://tung.github.io/posts/toml-syntax-highlighting-for-zola-front-matter-in-vim/</id>
+        
+        <content type="html" xml:base="https://tung.github.io/posts/toml-syntax-highlighting-for-zola-front-matter-in-vim/">&lt;p&gt;If you use &lt;a href=&quot;https:&#x2F;&#x2F;www.getzola.org&quot;&gt;Zola&lt;&#x2F;a&gt; and use Vim to edit Markdown files in your &lt;code&gt;content&lt;&#x2F;code&gt; directory, you may notice that the TOML front matter meta-data at the top of the file isn&#x27;t syntax highlighted.
+If you already have &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;toml-lang&#x2F;toml&#x2F;wiki#editor-support&quot;&gt;TOML syntax highlighting&lt;&#x2F;a&gt; set up for Vim, you can fix that with the following configuration:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;vim&quot; class=&quot;language-vim z-code&quot;&gt;&lt;code class=&quot;language-vim&quot; data-lang=&quot;vim&quot;&gt;&lt;span class=&quot;z-source z-viml&quot;&gt;unlet &lt;span class=&quot;z-variable z-other z-viml&quot;&gt;b:current_syntax&lt;&#x2F;span&gt;
+&lt;&#x2F;span&gt;&lt;span class=&quot;z-source z-viml&quot;&gt;syntax include &lt;span class=&quot;z-variable z-other z-viml&quot;&gt;@Toml&lt;&#x2F;span&gt; syntax&#x2F;toml&lt;span class=&quot;z-storage z-function z-viml&quot;&gt;.&lt;&#x2F;span&gt;vim
+&lt;&#x2F;span&gt;&lt;span class=&quot;z-source z-viml&quot;&gt;syntax region tomlFrontMatter start=&lt;span class=&quot;z-string z-regexp z-viml&quot;&gt;&#x2F;\%^+++$&#x2F;&lt;&#x2F;span&gt; &lt;span class=&quot;z-keyword z-control z-viml&quot;&gt;end&lt;&#x2F;span&gt;=&lt;span class=&quot;z-string z-regexp z-viml&quot;&gt;&#x2F;^+++$&#x2F;&lt;&#x2F;span&gt; contains=&lt;span class=&quot;z-variable z-other z-viml&quot;&gt;@Toml&lt;&#x2F;span&gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Put this in &lt;code&gt;~&#x2F;.vim&#x2F;after&#x2F;syntax&#x2F;markdown.vim&lt;&#x2F;code&gt; and the TOML front matter in your Markdown files should now be syntax highlighted.&lt;&#x2F;p&gt;
+&lt;p&gt;The &lt;code&gt;unlet&lt;&#x2F;code&gt; line is needed for the file inclusion on the next line to work properly.&lt;&#x2F;p&gt;
+&lt;p&gt;The &lt;code&gt;syntax include&lt;&#x2F;code&gt; line creates a &lt;em&gt;cluster&lt;&#x2F;em&gt; named &lt;code&gt;@Toml&lt;&#x2F;code&gt; that contains every syntax rule in all paths ending with &lt;code&gt;syntax&#x2F;toml.vim&lt;&#x2F;code&gt; that Vim can find in its runtime path list.&lt;&#x2F;p&gt;
+&lt;p&gt;The &lt;code&gt;syntax region&lt;&#x2F;code&gt; line denotes a Vim syntax region that we&#x27;ve chosen to name &lt;code&gt;tomlFrontMatter&lt;&#x2F;code&gt;.
+The region starts if the very first line of the file matches &lt;code&gt;+++&lt;&#x2F;code&gt;, and continues until a &lt;code&gt;+++&lt;&#x2F;code&gt; line is found.
+The whole region is marked as containing the &lt;code&gt;@Toml&lt;&#x2F;code&gt; cluster from the previous line.&lt;&#x2F;p&gt;
+&lt;p&gt;As a bonus, you can accomplish the same thing for YAML front matter in Jekyll with a similar configuration:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;vim&quot; class=&quot;language-vim z-code&quot;&gt;&lt;code class=&quot;language-vim&quot; data-lang=&quot;vim&quot;&gt;&lt;span class=&quot;z-source z-viml&quot;&gt;unlet &lt;span class=&quot;z-variable z-other z-viml&quot;&gt;b:current_syntax&lt;&#x2F;span&gt;
+&lt;&#x2F;span&gt;&lt;span class=&quot;z-source z-viml&quot;&gt;syntax include &lt;span class=&quot;z-variable z-other z-viml&quot;&gt;@Yaml&lt;&#x2F;span&gt; syntax&#x2F;yaml&lt;span class=&quot;z-storage z-function z-viml&quot;&gt;.&lt;&#x2F;span&gt;vim
+&lt;&#x2F;span&gt;&lt;span class=&quot;z-source z-viml&quot;&gt;syntax region yamlFrontMatter start=&lt;span class=&quot;z-string z-regexp z-viml&quot;&gt;&#x2F;\%^---$&#x2F;&lt;&#x2F;span&gt; &lt;span class=&quot;z-keyword z-control z-viml&quot;&gt;end&lt;&#x2F;span&gt;=&lt;span class=&quot;z-string z-regexp z-viml&quot;&gt;&#x2F;^---$&#x2F;&lt;&#x2F;span&gt; contains=&lt;span class=&quot;z-variable z-other z-viml&quot;&gt;@Yaml&lt;&#x2F;span&gt;
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Both of these configurations can co-exist in the same file too, applying either TOML or YAML syntax highlighting depending on whether &lt;code&gt;+++&lt;&#x2F;code&gt; or &lt;code&gt;---&lt;&#x2F;code&gt; is present at the top of the file.&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+</feed>
