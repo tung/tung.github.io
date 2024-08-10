@@ -33,6 +33,7 @@ RuggRogue was featured in the [June 2022 edition of This Month in Rust GameDev](
 
 ## More Information
 
+- [RuggRogue on itch.io](https://tungtn.itch.io/ruggrogue)
 - [RuggRogue website with browser-playable version](https://tung.github.io/ruggrogue/)
 - [RuggRogue source code on GitHub](https://github.com/tung/ruggrogue)
 - [RuggRogue Source Code Guide web book](https://tung.github.io/ruggrogue/source-code-guide/)
