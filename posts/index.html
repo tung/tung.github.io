@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="Programming, game development and other technical tidbits">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Posts | Tung&#x27;s Word Box</title>
+  <link rel="icon" href="https://tung.github.io/favicon.png" type="image/png" sizes="any">
+  <link rel="stylesheet" href="https://tung.github.io/tufte.css">
+  <link rel="stylesheet" href="https://tung.github.io/site.css">
+  
+  
+    <link rel="alternate" type="application/atom+xml" title="Tung&#x27;s Word Box" href="https://tung.github.io/atom.xml">
+  
+  <link rel="alternate" type="application/atom+xml" title="Tung&#x27;s Word Box - Posts" href="/posts/atom.xml">
+
+</head>
+
+<body>
+  <header>
+    <div class="home">
+      <a href="https://tung.github.io">Tung&#x27;s Word Box</a>
+    </div>
+    <nav>
+      <a href="https://tung.github.io/posts/">Posts</a>
+      <a href="https://tung.github.io/tags/">Tags</a>
+      <a href="https://tung.github.io/projects/">Projects</a>
+      <a href="https://github.com/tung">GitHub</a>
+      <a href="https://tungtn.itch.io">itch.io</a>
+    </nav>
+    <div style="clear: both"></div>
+  </header>
+
+  
+  <h1>Posts</h1>
+
+  
+    
+      
+  <article>
+    <h2><a href="&#x2F;posts&#x2F;learning-zigs-build-system-using-raylib&#x2F;">Learning Zig&#x27;s Build System using raylib</a></h2>
+    
+    <p class="meta">
+        Posted on 2024-11-06; 
+        Tags:
+        <span class="tags">
+              <a href="https://tung.github.io/tags/gamedev/">gamedev</a>,
+              <a href="https://tung.github.io/tags/programming/">programming</a>,
+              <a href="https://tung.github.io/tags/zig/">zig</a>
+        </span>
+    </p>
+    
+      
+    <p>I picked up some Zig recently and figured I'd take the chance to learn its build system using raylib.
+raylib already has pretty good community-maintained idiomatic Zig bindings, but we want to learn, so we're going to do it the "hard" way instead.</p>
+<p>raylib has a <code>build.zig</code>, which means that it can be used directly with Zig's package manager.
+Its C headers can also be translated into a Zig module that can be <code>@import</code>ed, thanks to Zig's built-in C translator.</p>
+<p>Note: We will <em>not</em> be using <code>@cImport</code>, since it seems like it'll be removed in future versions of Zig.</p>
+    <p class="meta"><a href="&#x2F;posts&#x2F;learning-zigs-build-system-using-raylib&#x2F;">(Read more)</a></p>
+
+    
+  </article>
+
+    
+      
+  <article>
+    <h2><a href="&#x2F;posts&#x2F;announcing-corics-quest&#x2F;">Announcing Coric&#x27;s Quest</a></h2>
+    
+    <p class="meta">
+        Posted on 2024-08-24; 
+        Tags:
+        <span class="tags">
+              <a href="https://tung.github.io/tags/gamedev/">gamedev</a>,
+              <a href="https://tung.github.io/tags/rust/">rust</a>,
+              <a href="https://tung.github.io/tags/webassembly/">webassembly</a>
+        </span>
+    </p>
+    
+      
+<figure>
+  <a href="&#x2F;projects&#x2F;corics-quest&#x2F;corics-quest-screenshot.png"><img src="https:&#x2F;&#x2F;tung.github.io&#x2F;processed_images&#x2F;corics-quest-screenshot.64c73d95ddb3c347.png" alt="Coric&amp;#x27;s Quest screenshot" title="Coric&amp;#x27;s Quest screenshot"></a>
+</figure>
+<p>So here's the game I've been working on the the last six months: <em>Coric's Quest</em>!
+It's a free and open source RPG that fits about two hours of game play into a single 9 MB file.
+There are native builds for Windows and Linux, and a WebAssembly build that can be played in a web browser.</p>
+<p>You can play it right now at <a href="https://tungtn.itch.io/corics-quest">itch.io</a> and on its <a href="https://tung.github.io/corics-quest/">homepage</a>.
+The source code can be found <a href="https://github.com/tung/corics-quest">on GitHub</a>.
+There's also a <a href="https://tung.github.io/projects/corics-quest/">project page</a> here on this site.</p>
+
+    
+  </article>
+
+    
+      
+  <article>
+    <h2><a href="&#x2F;posts&#x2F;making-a-chip-8-interpreter-chip8run&#x2F;">Making a CHIP-8 Interpreter: chip8run</a></h2>
+    
+    <p class="meta">
+        Posted on 2023-02-07; 
+        Tags:
+        <span class="tags">
+              <a href="https://tung.github.io/tags/c/">c</a>,
+              <a href="https://tung.github.io/tags/chip-8/">chip-8</a>,
+              <a href="https://tung.github.io/tags/emulator/">emulator</a>,
+              <a href="https://tung.github.io/tags/programming/">programming</a>,
+              <a href="https://tung.github.io/tags/webassembly/">webassembly</a>
+        </span>
+    </p>
+    
+      
+    <p>I wanted to try my hand at making interactive graphical applications with C, WebAssemnbly and the <a href="https://github.com/floooh/sokol">Sokol</a> header-only libraries when I stumbled across the <a href="https://en.wikipedia.org/wiki/CHIP-8">CHIP-8</a>.
+Creating a CHIP-8 interpreter ("emulator") was as good an excuse as any to scratch my itch, and a little while later I ended up with <a href="https://tung.github.io/chip8run/"><strong>chip8run</strong></a>, which you can try online right now.</p>
+    <p class="meta"><a href="&#x2F;posts&#x2F;making-a-chip-8-interpreter-chip8run&#x2F;">(Read more)</a></p>
+
+    
+  </article>
+
+    
+      
+  <article>
+    <h2><a href="&#x2F;posts&#x2F;my-workflow-for-following-crafting-interpreters&#x2F;">My Workflow for following Crafting Interpreters</a></h2>
+    
+    <p class="meta">
+        Posted on 2022-12-24, 
+        Updated 2022-12-26; 
+        Tags:
+        <span class="tags">
+              <a href="https://tung.github.io/tags/c/">c</a>,
+              <a href="https://tung.github.io/tags/linux/">linux</a>,
+              <a href="https://tung.github.io/tags/make/">make</a>,
+              <a href="https://tung.github.io/tags/programming/">programming</a>,
+              <a href="https://tung.github.io/tags/testing/">testing</a>
+        </span>
+    </p>
+    
+      
+    <p>I recently worked my way through Robert Nystrom's <a href="https://craftinginterpreters.com"><em>Crafting Interpreters</em></a>, which guides you through the process of making an interpreter for a scripting language.
+The book is made up of three parts: a short part describing Lox (the scripting language made for the book), a tree-walk interpreter written in Java and a bytecode virtual machine interpreter written in C.
+This post is about how I approached the last part.</p>
+<p>The book doesn't recommend any specific setup or workflow, so you're free to go with whatever you like.
+The rest of this post describes what I went with; all of the code can be found here: <a href="https://github.com/tung/clox">https://github.com/tung/clox</a></p>
+    <p class="meta"><a href="&#x2F;posts&#x2F;my-workflow-for-following-crafting-interpreters&#x2F;">(Read more)</a></p>
+
+    
+  </article>
+
+    
+      
+  <article>
+    <h2><a href="&#x2F;posts&#x2F;rust-and-webassembly-without-a-bundler&#x2F;">Rust and WebAssembly without a Bundler</a></h2>
+    
+    <p class="meta">
+        Posted on 2022-08-04, 
+        Updated 2022-08-06; 
+        Tags:
+        <span class="tags">
+              <a href="https://tung.github.io/tags/javascript/">javascript</a>,
+              <a href="https://tung.github.io/tags/programming/">programming</a>,
+              <a href="https://tung.github.io/tags/rust/">rust</a>,
+              <a href="https://tung.github.io/tags/webassembly/">webassembly</a>,
+              <a href="https://tung.github.io/tags/webdev/">webdev</a>
+        </span>
+    </p>
+    
+      
+    <p>If you're just getting into compiling your Rust code into WebAssembly and want to load it in a web browser, you might be taken aback by the multitude of ways of doing so.
+This seems to be due to the differing pace of web browsers implementing web platform features over the years.
+A lot of entry-level guides to using Rust and WebAssembly make use of a JavaScript bundler for convenience, but this obscures the relationship between Rust, WebAssembly, JavaScript and HTML, so instead we're going to try doing this all by hand.
+Specifically, we're going to compile some Rust code into WebAssembly and do a run-down of the ways to load it directly in a web page using just JavaScript.
+If you want to follow along at home, make sure you have Rust installed and the <code>wasm32-unknown-unknown</code> target:</p>
+<pre class="z-code"><code><span class="z-text z-plain">rustup target add wasm32-unknown-unknown
+</span></code></pre>
+<p>We're going to look at these loading methods through the perspective of compatibility with three desktop web browsers: Chrome, Firefox and Safari.
+I'll be consulting the extremely-helpful <a href="https://caniuse.com">Can I use</a> website for this info.</p>
+<p>Ready?
+Okay, let's go!</p>
+    <p class="meta"><a href="&#x2F;posts&#x2F;rust-and-webassembly-without-a-bundler&#x2F;">(Read more)</a></p>
+
+    
+  </article>
+
+    
+    <nav id="pagination" class="bottom-nav" style="text-align: center">
+      <div class="inactive">&Lt; Newest</div>
+      <div class="inactive">&lt; Newer</div>
+      <div>Page 1 of 2</div>
+      <div><a href="https:&#x2F;&#x2F;tung.github.io&#x2F;posts&#x2F;page&#x2F;2&#x2F;">Older &gt;</a></div>
+      <div><a href="https:&#x2F;&#x2F;tung.github.io&#x2F;posts&#x2F;page&#x2F;2&#x2F;">Oldest &Gt;</a></div>
+    </nav>
+  
+
+  <footer>
+    Made with <a href="https://www.getzola.org">Zola</a>.
+  </footer>
+</body>
+
+</html>

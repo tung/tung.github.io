@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title>Tung&#x27;s Word Box - webassembly</title>
+    <subtitle>Programming, game development and other technical tidbits</subtitle>
+    <link rel="self" type="application/atom+xml" href="https://tung.github.io/tags/webassembly/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://tung.github.io"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2024-08-24T00:00:00+00:00</updated>
+    <id>https://tung.github.io/tags/webassembly/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Announcing Coric&#x27;s Quest</title>
+        <published>2024-08-24T00:00:00+00:00</published>
+        <updated>2024-08-24T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              tungtn
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://tung.github.io/posts/announcing-corics-quest/"/>
+        <id>https://tung.github.io/posts/announcing-corics-quest/</id>
+        
+        <content type="html" xml:base="https://tung.github.io/posts/announcing-corics-quest/">
+&lt;figure&gt;
+  &lt;a href=&quot;&amp;#x2F;projects&amp;#x2F;corics-quest&amp;#x2F;corics-quest-screenshot.png&quot;&gt;&lt;img src=&quot;https:&amp;#x2F;&amp;#x2F;tung.github.io&amp;#x2F;processed_images&amp;#x2F;corics-quest-screenshot.64c73d95ddb3c347.png&quot; alt=&quot;Coric&amp;amp;#x27;s Quest screenshot&quot; title=&quot;Coric&amp;amp;#x27;s Quest screenshot&quot;&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;figure&gt;
+&lt;p&gt;So here&#x27;s the game I&#x27;ve been working on the the last six months: &lt;em&gt;Coric&#x27;s Quest&lt;&#x2F;em&gt;!
+It&#x27;s a free and open source RPG that fits about two hours of game play into a single 9 MB file.
+There are native builds for Windows and Linux, and a WebAssembly build that can be played in a web browser.&lt;&#x2F;p&gt;
+&lt;p&gt;You can play it right now at &lt;a href=&quot;https:&#x2F;&#x2F;tungtn.itch.io&#x2F;corics-quest&quot;&gt;itch.io&lt;&#x2F;a&gt; and on its &lt;a href=&quot;https:&#x2F;&#x2F;tung.github.io&#x2F;corics-quest&#x2F;&quot;&gt;homepage&lt;&#x2F;a&gt;.
+The source code can be found &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;tung&#x2F;corics-quest&quot;&gt;on GitHub&lt;&#x2F;a&gt;.
+There&#x27;s also a &lt;a href=&quot;https:&#x2F;&#x2F;tung.github.io&#x2F;projects&#x2F;corics-quest&#x2F;&quot;&gt;project page&lt;&#x2F;a&gt; here on this site.&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Making a CHIP-8 Interpreter: chip8run</title>
+        <published>2023-02-07T00:00:00+00:00</published>
+        <updated>2023-02-07T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              tungtn
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://tung.github.io/posts/making-a-chip-8-interpreter-chip8run/"/>
+        <id>https://tung.github.io/posts/making-a-chip-8-interpreter-chip8run/</id>
+        
+        <summary type="html">&lt;p&gt;I wanted to try my hand at making interactive graphical applications with C, WebAssemnbly and the &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;floooh&#x2F;sokol&quot;&gt;Sokol&lt;&#x2F;a&gt; header-only libraries when I stumbled across the &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;CHIP-8&quot;&gt;CHIP-8&lt;&#x2F;a&gt;.
+Creating a CHIP-8 interpreter (&quot;emulator&quot;) was as good an excuse as any to scratch my itch, and a little while later I ended up with &lt;a href=&quot;https:&#x2F;&#x2F;tung.github.io&#x2F;chip8run&#x2F;&quot;&gt;&lt;strong&gt;chip8run&lt;&#x2F;strong&gt;&lt;&#x2F;a&gt;, which you can try online right now.&lt;&#x2F;p&gt;
+</summary>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Rust and WebAssembly without a Bundler</title>
+        <published>2022-08-04T00:00:00+00:00</published>
+        <updated>2022-08-06T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              tungtn
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://tung.github.io/posts/rust-and-webassembly-without-a-bundler/"/>
+        <id>https://tung.github.io/posts/rust-and-webassembly-without-a-bundler/</id>
+        
+        <summary type="html">&lt;p&gt;If you&#x27;re just getting into compiling your Rust code into WebAssembly and want to load it in a web browser, you might be taken aback by the multitude of ways of doing so.
+This seems to be due to the differing pace of web browsers implementing web platform features over the years.
+A lot of entry-level guides to using Rust and WebAssembly make use of a JavaScript bundler for convenience, but this obscures the relationship between Rust, WebAssembly, JavaScript and HTML, so instead we&#x27;re going to try doing this all by hand.
+Specifically, we&#x27;re going to compile some Rust code into WebAssembly and do a run-down of the ways to load it directly in a web page using just JavaScript.
+If you want to follow along at home, make sure you have Rust installed and the &lt;code&gt;wasm32-unknown-unknown&lt;&#x2F;code&gt; target:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;z-code&quot;&gt;&lt;code&gt;&lt;span class=&quot;z-text z-plain&quot;&gt;rustup target add wasm32-unknown-unknown
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;We&#x27;re going to look at these loading methods through the perspective of compatibility with three desktop web browsers: Chrome, Firefox and Safari.
+I&#x27;ll be consulting the extremely-helpful &lt;a href=&quot;https:&#x2F;&#x2F;caniuse.com&quot;&gt;Can I use&lt;&#x2F;a&gt; website for this info.&lt;&#x2F;p&gt;
+&lt;p&gt;Ready?
+Okay, let&#x27;s go!&lt;&#x2F;p&gt;
+</summary>
+        
+    </entry>
+</feed>

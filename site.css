@@ -1,0 +1,99 @@
+@import url("syntax-light.css") (prefers-color-scheme: light);
+@import url("syntax-dark.css") (prefers-color-scheme: dark);
+
+header {
+    font-size: 15pt;
+    margin-bottom: 0.7rem;
+    padding: 1em 0;
+    width: 55%;
+}
+
+header a {
+    color: #888;
+    text-decoration: none;
+}
+
+header .home {
+    float: left;
+}
+
+header nav {
+    float: right;
+}
+
+nav a {
+    margin-left: 0.3em;
+}
+
+.meta {
+    color: #888;
+    font-size: 1.2rem;
+    width: 55%;
+}
+
+.tags a:before {
+    font-size: 0.9rem;
+}
+
+.zola-anchor {
+    border-bottom-color: transparent;
+    color: #888;
+    font-size: 1.5rem;
+    margin-left: -1.5rem;
+    text-decoration: none;
+}
+
+.bottom-nav {
+    margin-top: 6rem;
+}
+
+#pagination {
+    display: flex;
+    font-size: 1.2rem;
+    justify-content: space-evenly;
+    width: 55%;
+}
+
+#pagination .inactive {
+    color: #888;
+}
+
+body > footer {
+    color: #888;
+    position: relative;
+    text-align: center;
+    top: 4rem;
+    width: 55%;
+}
+
+@media (max-width: 760px) {
+    header,
+    .meta,
+    #pagination,
+    body > footer {
+        width: 100%;
+    }
+}
+
+pre[data-linenos] {
+    padding: 1rem 0;
+}
+
+pre table td {
+    padding: 0;
+}
+
+pre table td:nth-of-type(1) {
+    color: #888;
+    padding-right: 1rem;
+    text-align: right;
+    user-select: none;
+}
+pre mark {
+    display: block;
+    background-color: rgba(254, 252, 232, 0.9);
+}
+pre table {
+    width: 100%;
+    border-collapse: collapse;
+}
