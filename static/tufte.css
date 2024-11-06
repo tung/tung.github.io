@@ -25,7 +25,7 @@
  *   character.
  * - Prefer Liberation Mono over Consolas for <code>.
  * - Move width handling of <code> over to <pre> and adjust <code> spacing.
- * - Add padding and border to <code> in <p>.
+ * - Add padding and border to inline <code>.
  * - Remove fixed padding for .iframe-wrapper; it needs to be done per iframe.
  */
 
@@ -347,7 +347,12 @@ code, pre > code {
     -webkit-text-size-adjust: 100%; /* Prevent adjustments of font size after orientation changes in iOS. See https://github.com/edwardtufte/tufte-css/issues/81#issuecomment-261953409 */
 }
 
-p > code {
+p > code,
+p > em > code,
+p > strong > code,
+li > code,
+li > em > code,
+li > strong > code {
     border: 1px solid;
     margin-left: 0.1rem;
     margin-right: 0.1rem;
