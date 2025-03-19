@@ -1,5 +1,5 @@
 +++
-title = "DeadCold (fork)"
+title = "DeadCold (mod)"
 updated = 2011-10-24
 weight = 80
 extra.role = "Salvaged inactive project to build on modern systems."

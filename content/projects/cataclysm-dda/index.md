@@ -1,5 +1,5 @@
 +++
-title = "Cataclysm: Dark Days Ahead (fork)"
+title = "Cataclysm: Dark Days Ahead (mod)"
 updated = 2020-09-07
 weight = 60
 extra.role = "Upstream bug fixes; developed mods in personal fork."

@@ -1,5 +1,5 @@
 +++
-title = "Dungeon Monkey Eternal (fork)"
+title = "Dungeon Monkey Eternal (mod)"
 updated = 2014-05-12
 weight = 90
 extra.role = "Minor bug fixes in personal fork."
