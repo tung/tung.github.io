@@ -1,8 +1,11 @@
 +++
 date = 2024-11-06
+updated = 2025-03-19
 title = "Learning Zig's Build System using raylib"
 taxonomies.tags = ["gamedev", "programming", "zig"]
 +++
+
+**Edit**: Updated for Zig 0.14.0 and a version of raylib that works with it.
 
 I picked up some Zig recently and figured I'd take the chance to learn its build system using raylib.
 raylib already has pretty good community-maintained idiomatic Zig bindings, but we want to learn, so we're going to do it the "hard" way instead.
@@ -16,12 +19,12 @@ Note: We will *not* be using `@cImport`, since it seems like it'll be removed in
 
 ## Warning about Versions
 
-Zig, its build system and package manager, and Raylib's Zig support are all currently under active development.
+Zig, its build system and package manager, and raylib's Zig support are all currently under active development.
 Details are subject to change.
 
-**Zig version**: This needs *Zig 0.14*, which is still in development and thus hasn't been released yet; Zig 0.13 will not work.
+**Zig version**: This needs *Zig 0.14*; Zig 0.13 will not work.
 
-**raylib**: Commit `ad79d4a88422256d348ecfd06c53f8bc44b7777f` (2024-10-30); raylib v5.0 is too old for this.
+**raylib**: Commit `75b6b825dfc93488bc411c00845164b5c0f8fae6.zip` (2024-12-29); raylib v5.5 is too old for this.
 
 NOTE: This version of Zig spits out a bunch of error messages when linking the final executable.
 The build should still succeed regardless; check the output directory.
@@ -89,7 +92,7 @@ Put this into `build.zig.zon`:
 
 ```zig
 .{
-    .name = "example",
+    .name = .example,
     .version = "0.1.0",
     .minimum_zig_version = "0.14.0",
     .dependencies = .{},
@@ -98,6 +101,7 @@ Put this into `build.zig.zon`:
         "build.zig.zon",
         "src",
     },
+    .fingerprint = 0x6eec9b9fa0e0208d,
 }
 ```
 
@@ -114,33 +118,29 @@ Here's the field-by-field break down:
 
 `.paths`: Files and directories of this package that Zig's package manager will keep after getting the source.
 
+`.fingerprint`: Hexadecimal number that identifies this package; if you leave it out, Zig will suggest one for you.
+
 Our dependency list is empty right now.
-Run the following command to fetch the raylib Zig package:
+Run the following commands to fetch the raylib Zig package:
 
 ```
-zig fetch --save=raylib https://github.com/raysan5/raylib/archive/ad79d4a88422256d348ecfd06c53f8bc44b7777f.zip
+touch build.zig
+zig fetch --save=raylib https://github.com/raysan5/raylib/archive/75b6b825dfc93488bc411c00845164b5c0f8fae6.zip
 ```
 
-This outputs the following hash:
-
-```
-1220b990116595bb998d0ccb401b6497363321ec55e366402695cac531b6d93a1e34
-```
-
-This hash represents where the raylib dependency lives in the global Zig cache directory.
-It is *not* a git hash.
+`zig fetch` will fail without a `build.zig` file present, so we make an empty one before running the command.
 
 If you look at `build.zig.zon` again, it should now look like this:
 
 ```zig
 .{
-    .name = "example",
+    .name = .example,
     .version = "0.1.0",
     .minimum_zig_version = "0.14.0",
     .dependencies = .{
         .raylib = .{
-            .url = "https://github.com/raysan5/raylib/archive/ad79d4a88422256d348ecfd06c53f8bc44b7777f.zip",
-            .hash = "1220b990116595bb998d0ccb401b6497363321ec55e366402695cac531b6d93a1e34",
+            .url = "https://github.com/raysan5/raylib/archive/75b6b825dfc93488bc411c00845164b5c0f8fae6.zip",
+            .hash = "raylib-5.5.0-AAAAAHV3zADPmK0F1nLRNCUQrnezXuXiIs3ixRNKFHdN",
         },
     },
     .paths = .{
@@ -148,6 +148,7 @@ If you look at `build.zig.zon` again, it should now look like this:
         "build.zig.zon",
         "src",
     },
+    .fingerprint = 0x6eec9b9fa0e0208d,
 }
 ```
 
@@ -191,11 +192,11 @@ Our upcoming `build.zig` has to create a build graph that does the following:
 2. Pull in the raylib dependency, made available thanks to our `build.zig.zon`.
 3. Translate the C code in `src/c.h` into Zig bindings.
 4. Create a Zig module from the translated `src/c.h` that links to raylib when imported.
-5. Build `src/main.zig` that imports the C-to-Zig module into an executable.
+5. Make an executable from a module with `src/main.zig` that itself imports the C-to-Zig module.
 6. Install the executable as part of the default `install` top-level step.
 7. Create a step to run the executable, and a custom `run` top-level step to trigger it.
 
-Create a `build.zig` with the following contents:
+Put the following into the empty `build.zig` we created earlier:
 
 ```zig
 const std = @import("std");
@@ -303,20 +304,26 @@ We use `linkLibrary` to tell the build system to link to the raylib library when
 ### Building the Executable
 
 ```zig
-    const exe = b.addExecutable(.{
-        .name = "example",
+    const mod = b.createModule(.{
         .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
     });
-    exe.root_module.addImport("c", c_module);
+    mod.addImport("c", c_module);
+
+    const exe = b.addExecutable(.{
+        .name = "example",
+        .root_module = mod,
+    });
 ```
 
-`b.addExecutable` creates a `Compile` step that builds our executable.
+`b.createModule` makes a _module_, which is a group of files that Zig knows how to compile, with extra info on how they should be compiled.
 `root_source_file` points at our package-relative `src/main.zig` file path.
 `target` and `optimize` are specified as before.
 
-`exe.root_module.addImport("c", c_module)` allows `@import("c")` to work inside `src/main.zig`.
+`mod.addImport("c", c_module)` allows `@import("c")` to work inside `src/main.zig`.
+
+`b.addExecutable` creates a `Compile` step that links an executable from the module we just created.
 
 ### Installing the Executable
 
@@ -400,13 +407,17 @@ pub fn build(b: *std.Build) void {
     const c_module = translate_c.createModule();
     c_module.linkLibrary(raylib_art);
 
-    const exe = b.addExecutable(.{
-        .name = "example",
+    const mod = b.createModule(.{
         .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
     });
-    exe.root_module.addImport("c", c_module);
+    mod.addImport("c", c_module);
+
+    const exe = b.addExecutable(.{
+        .name = "example",
+        .root_module = mod,
+    });
 
     b.installArtifact(exe);
 
