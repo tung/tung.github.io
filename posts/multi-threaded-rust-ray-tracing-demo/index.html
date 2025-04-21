@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="Programming, game development and other technical tidbits">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Multi-Threaded Rust Ray Tracing Demo | Tung&#x27;s Word Box</title>
+  <link rel="icon" href="https://tung.github.io/favicon.png" type="image/png" sizes="any">
+  <link rel="stylesheet" href="https://tung.github.io/tufte.css">
+  <link rel="stylesheet" href="https://tung.github.io/site.css">
+  
+    <link rel="alternate" type="application/atom+xml" title="Tung&#x27;s Word Box" href="https://tung.github.io/atom.xml">
+  
+</head>
+
+<body>
+  <header>
+    <div class="home">
+      <a href="https://tung.github.io">Tung&#x27;s Word Box</a>
+    </div>
+    <nav>
+      <a href="https://tung.github.io/posts/">Posts</a>
+      <a href="https://tung.github.io/tags/">Tags</a>
+      <a href="https://tung.github.io/projects/">Projects</a>
+      <a href="https://github.com/tung">GitHub</a>
+      <a href="https://tungtn.itch.io">itch.io</a>
+    </nav>
+    <div style="clear: both"></div>
+  </header>
+
+  
+  <h1>Multi-Threaded Rust Ray Tracing Demo</h1>
+  <article>
+    
+    
+    <p class="meta">
+        Posted on 2025-03-19; 
+        Tags:
+        <span class="tags">
+              <a href="https://tung.github.io/tags/graphics/">graphics</a>,
+              <a href="https://tung.github.io/tags/programming/">programming</a>,
+              <a href="https://tung.github.io/tags/rust/">rust</a>
+        </span>
+    </p>
+    <br>
+    
+<figure>
+  <a href="&#x2F;posts&#x2F;multi-threaded-rust-ray-tracing-demo&#x2F;ray-tracing.png"><img src="https:&#x2F;&#x2F;tung.github.io&#x2F;processed_images&#x2F;ray-tracing.25c002aa6a97723f.png" alt="Ray-traced scene with spheres rendered with multi-threaded Rust" title="Ray-traced scene with spheres rendered with multi-threaded Rust"></a>
+</figure>
+<p><a href="https://raytracing.github.io/books/RayTracingInOneWeekend.html"><em>Ray Tracing in One Weekend</em></a> is a free online book that takes you through the process of programming a ray tracer from scratch.
+It starts by writing support code to do math with 3-element vectors, building up a 3D scene with spheres and adding materials, and finishing by rendering a large scene of spheres of various sizes and materials.</p>
+<p>The book provides source code in C++, which I followed directly my first time through.
+Having done that, I decided to get a little bolder and repeat the experiment with Rust.
+This went well enough that I went even further and added multi-threading to speed it up;
+the picture above is the result of letting this multi-threaded renderer run for a while.</p>
+<p>Anyway, this ended up being interesting enough to do a write-up about, so here it is;
+read on!</p>
+<span id="continue-reading"></span><h2 id="following-with-rust"><a class="zola-anchor" href="#following-with-rust" aria-label="Anchor link for: following-with-rust">&num;</a>
+Following With Rust</h2>
+<p>Translating the logic from C++ to Rust was uneventful;
+operator overloading in Rust uses traits instead of an <code>operator</code> keyword, but otherwise all the vector math code ends up looking more-or-less the same as in C++.</p>
+<h2 id="rendering-to-a-window"><a class="zola-anchor" href="#rendering-to-a-window" aria-label="Anchor link for: rendering-to-a-window">&num;</a>
+Rendering to a Window</h2>
+<p>The book outputs the rendered scene into a PPM file, which is an image format that can be created with text output.
+I decided it'd be nicer if I could see the output of the render right away, without having to spit it out into a file first.
+My first time through, I did this with C++ and <a href="https://www.raylib.com">raylib</a>, which worked well enough.</p>
+<p>Doing this with Rust, I decided to go with <a href="https://github.com/not-fl3/miniquad">Miniquad</a>.
+It's smaller and simpler than something like raylib, but it gets the job done.
+It also has minimal dependencies and compiles very quickly, which makes it really nice for simple projects like this that just need a window to draw to and basic input event handling.</p>
+<p>The easiest way to get cross-platform graphics working in Miniquad is using its OpenGL graphics backend.
+OpenGL is only used to draw the final render into the window;
+the entire ray tracing logic is implemented in software, writing color values into a pixel buffer whose contents are uploaded into 2D textures for display.</p>
+<h2 id="real-time-updates"><a class="zola-anchor" href="#real-time-updates" aria-label="Anchor link for: real-time-updates">&num;</a>
+Real-Time Updates</h2>
+<p>The book puts its output into an image file.
+Unfortunately, this means that you can't see the rendered output until it's fully completed;
+this can take a long time when the render is large and many rays are involved.</p>
+<p>The biggest time-eater in the process of ray tracing described by the book is <em>antialiasing</em>.
+Each pixel has multiple rays traced through it, each with a small random variation in direction.
+The resulting colors are averaged-together to determine the final color of the pixel.
+The book achieves this in the simplest way possible:
+stop at each pixel and fire, say, fifty rays, and average the colors to produce that pixel's final color before moving on.</p>
+<p>I realized that showing results in a window presented me with another option:
+I could instead fire just one ray through each pixel for the whole scene per frame, sum the color values over successive runs, then just divide by the number of render passes to average the resulting colors.
+This allows ray tracing results to be seen much earlier and more often, as each frame completes.</p>
+<p>For small renders, this is enough, but a large scene can take several seconds to even complete a single ray through each pixel of the whole view.
+To deal with this, I opted for <em>progressive row updates</em>:
+check if enough time was spent rendering after each row, and break out early if so.
+The last-rendered row is tracked so the render loop can just pick up where it left off last time.
+This means that render updates can be viewed with 60 FPS updates!</p>
+<h2 id="threads-step-1-split-view-rendering"><a class="zola-anchor" href="#threads-step-1-split-view-rendering" aria-label="Anchor link for: threads-step-1-split-view-rendering">&num;</a>
+Threads Step 1: Split View Rendering</h2>
+<p>The book renders the entire width of the view to render in a standard 2D nested loop arrangement.
+In order to divide the work of ray casting across multiple threads, the view needs to be split so that each thread can work independently of the others.
+I chose to split the view into multiple columns, each one with its own dedicated thread.</p>
+
+<figure>
+  <a href="&#x2F;posts&#x2F;multi-threaded-rust-ray-tracing-demo&#x2F;ray-tracing-partial.png"><img src="https:&#x2F;&#x2F;tung.github.io&#x2F;processed_images&#x2F;ray-tracing-partial.4c3b8d19186c39d5.png" alt="Partial render of a ray-traced scene split between four threads" title="Partial render of a ray-traced scene split between four threads"></a>
+</figure>
+<p>The image above is of the very first render pass of four separate views, each being processed by its own thread.
+Some of the views have more work to do than the others, so they make less progress in the same time as other, less-burdened views.
+Yes, it really is this grainy at the beginning;
+antialiasing with multiple passes counts for a lot of the final quality!</p>
+<p>Each view needs its own render state:</p>
+<ul>
+<li>A color buffer that holds the sum of colors for all rays cast for each pixel to calculate its average color.</li>
+<li>A pixel buffer for the displayed red/green/blue/alpha values after averaging, to be uploaded to textures for final display.</li>
+<li>The portion of the scene that it should individually render.</li>
+<li>The number of render passes completed for the view so far.</li>
+<li>Size and on-screen position, which serve as inputs to a simple shader that puts everything in the right place.</li>
+</ul>
+<p>Each thread also needs to manage its own pseudorandom number generator (PRNG).</p>
+<h3 id="pseudorandom-number-generation"><a class="zola-anchor" href="#pseudorandom-number-generation" aria-label="Anchor link for: pseudorandom-number-generation">&num;</a>
+Pseudorandom Number Generation</h3>
+<p>As mentioned earlier, the antialiasing technique described by the book needs random numbers to work properly.
+Random numbers are also used to pick a direction to bounce rays that hit matte materials and metals with fuzzy reflections.
+There are lots of ways to get them, but it's important here that the multiple threads don't cause any data race problems from, say, fighting over the same random number generator.</p>
+<p>To avoid this, as well as taking on any unneeded dependencies, I ported an existing PRNG: <em>xoshiro256+</em> from <a href="https://prng.di.unimi.it">https://prng.di.unimi.it</a>.
+As suggested on that site, it's seeded by feeding a <code>u64</code> timestamp through another PRNG (<em>splitmix64</em>), and using its output to fill in its initial state.</p>
+<p>The raw values produced by the <em>xoshiro256+</em> algorithm range from <code>0</code> to <code>u64::MAX</code>.
+To reduce the range to more usable values while avoiding bias, I use <a href="https://lemire.me/blog/2019/06/06/nearly-divisionless-random-integer-generation-on-various-systems/">Lemire's Nearly Divisionless Random Integer Generation</a>.</p>
+<p>From here, this code can be made to produce <code>f64</code> values from <code>0.0</code> to <code>1.0</code> that serve as the random number primitive used by the rest of the ray casting logic.
+To get such <code>f64</code> values from constrained <code>u64</code> values, I generate a random <code>u64</code> from <code>0</code> to <code>(1 &lt;&lt; 53) - 1</code> and divide it by <code>1 &lt;&lt; 53</code>.
+I choose "53" bits here since <code>f64</code>s can't track <code>+1.0</code> or <code>-1.0</code> changes beyond that number of bits.
+Doing this ensures the random <code>f64</code> values are generated up to, but never equal to, <code>1.0</code>, which is needed to avoid invalid values in calculations involving PRNG-produced values.</p>
+<h2 id="threads-step-2-controlling-each-thread"><a class="zola-anchor" href="#threads-step-2-controlling-each-thread" aria-label="Anchor link for: threads-step-2-controlling-each-thread">&num;</a>
+Threads Step 2: Controlling Each Thread</h2>
+<p>As you might have noticed in the earlier picture, some threads have more work to do than others;
+I wanted every thread to have finished a render pass before any of them start the next.
+To make this happen, I needed a way for the main (non-render) thread to tell the render threads <em>the number of render passes it wants</em>.
+To decide when the next render pass should start (i.e. when to increment this number), the main thread needs to be told <em>the number of render passes each thread has completed so far</em>.</p>
+<p>Solving this involves the use of <em>channels</em> (<code>std::sync::mpsc</code>), which lets threads talk to each other.
+Creating a channel gives us a <em>sender</em> and a <em>receiver</em>, each of which can be given to a different thread.
+The receiver puts its thread to sleep while waiting for the sender to give it data.</p>
+<p>For each thread, a channel for passes wanted creates a sender for the main non-render thread in a <code>passes_wanted_txs</code> vector, and a receiver for the render thread named <code>passes_wanted_rx</code>.
+Another channel for passes completed creates a sender for the render thread named <code>passes_done_tx</code>, and a receiver for the main non-render thread stored in a <code>passes_done_rxs</code> vector.</p>
+<p>With all this set up, the main thread just needs to send the number of render passes wanted to each of the render threads to kick off rendering.
+When each thread finishes its render loop, it sends back the number of render passes it completed so that the main thread can decide if the next render pass should begin the next time around.</p>
+<p>If this was all there was to it, there'd be no way for any of the render threads to stop their render loops early.
+All the threads check a <code>pause</code> flag, which is a <code>std::sync::atomic::AtomicBool</code> that is shared between all the threads, including the main non-render thread.
+The main thread can set this flag to cause the render threads to break from their rendering early.</p>
+<p>The high-level render thread logic thus looks like this:</p>
+<ol>
+<li>Receieve number of render passes wanted through <code>passes_wanted_rx</code>.</li>
+<li>If render passes completed by this thread is less than the passes wanted:
+<ol>
+<li>Run the render loop until the <code>pause</code> flag is set or a render pass completes.</li>
+</ol>
+</li>
+<li>Send the number of render passes completed by this thread to the main thread via <code>passes_done_tx</code>.</li>
+<li>Go to step 1.</li>
+</ol>
+<p>Here's a simplified version of the code that does this:</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> Top-level render thread code.
+</span></span><span class="z-source z-rust"><span class="z-keyword z-control z-rust">while</span> <span class="z-storage z-type z-rust">let</span> <span class="z-support z-type z-rust">Ok</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>passes_wanted</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-keyword z-operator z-assignment z-rust">=</span> passes_wanted_rx<span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">recv</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-type z-rust">let</span> <span class="z-storage z-modifier z-rust">mut</span> pixel_buf <span class="z-keyword z-operator z-assignment z-rust">=</span> pixel_buf<span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">lock</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">expect</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-string z-quoted z-double z-rust"><span class="z-punctuation z-definition z-string z-begin z-rust">&quot;</span>pixel_buf mutex<span class="z-punctuation z-definition z-string z-end z-rust">&quot;</span></span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust">    view<span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">render</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-keyword z-operator z-bitwise z-rust">&amp;</span><span class="z-storage z-modifier z-rust">mut</span> rng<span class="z-punctuation z-separator z-rust">,</span> <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span>scene<span class="z-punctuation z-separator z-rust">,</span> <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span><span class="z-storage z-modifier z-rust">mut</span> pixe_buf<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">[</span><span class="z-keyword z-operator z-range z-rust">..</span><span class="z-punctuation z-section z-group z-end z-rust">]</span></span><span class="z-punctuation z-separator z-rust">,</span> passes_wanted</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust">    <span class="z-support z-function z-rust">drop</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>pixel_buf</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust">    passes_done_tx
+</span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust">        <span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">send</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>view<span class="z-punctuation z-accessor z-dot z-rust">.</span>render_passes</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust">        <span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">expect</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-string z-quoted z-double z-rust"><span class="z-punctuation z-definition z-string z-begin z-rust">&quot;</span>passes_done_tx<span class="z-punctuation z-definition z-string z-end z-rust">&quot;</span></span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span><span class="z-source z-rust"><span class="z-meta z-block z-rust"></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span><span class="z-source z-rust">
+</span><span class="z-source z-rust"><span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> ...
+</span></span><span class="z-source z-rust">
+</span><span class="z-source z-rust"><span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> View::render method that `view.render(...)` above calls.
+</span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-function z-rust"><span class="z-storage z-modifier z-rust">pub</span> <span class="z-storage z-type z-function z-rust">fn</span> </span><span class="z-entity z-name z-function z-rust">render</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-begin z-rust">(</span><span class="z-comment z-block z-rust"><span class="z-punctuation z-definition z-comment z-rust">/*</span> ... <span class="z-punctuation z-definition z-comment z-rust">*/</span></span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-end z-rust">)</span></span></span></span><span class="z-meta z-function z-rust"> </span><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-keyword z-control z-rust">if</span> <span class="z-variable z-language z-rust">self</span><span class="z-punctuation z-accessor z-dot z-rust">.</span>render_passes <span class="z-keyword z-operator z-comparison z-rust">&gt;=</span> passes_wanted <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">        <span class="z-keyword z-control z-rust">break</span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">    </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-keyword z-control z-rust">for</span> row <span class="z-keyword z-operator z-rust">in</span> rows <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">        <span class="z-keyword z-control z-rust">for</span> pixel <span class="z-keyword z-operator z-rust">in</span> row <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">            <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> cast rays, accumulate colors, write RGBA values to pixel_buf
+</span></span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">        </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">        <span class="z-variable z-language z-rust">self</span><span class="z-punctuation z-accessor z-dot z-rust">.</span>start_row <span class="z-keyword z-operator z-assignment z-rust">+=</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">1</span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">        <span class="z-keyword z-control z-rust">if</span> <span class="z-variable z-language z-rust">self</span><span class="z-punctuation z-accessor z-dot z-rust">.</span>start_row <span class="z-keyword z-operator z-comparison z-rust">&gt;=</span> <span class="z-variable z-language z-rust">self</span><span class="z-punctuation z-accessor z-dot z-rust">.</span>height <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">            <span class="z-variable z-language z-rust">self</span><span class="z-punctuation z-accessor z-dot z-rust">.</span>render_passes <span class="z-keyword z-operator z-assignment z-rust">+=</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">1</span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">            <span class="z-variable z-language z-rust">self</span><span class="z-punctuation z-accessor z-dot z-rust">.</span>start_row <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">0</span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">        </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">        <span class="z-keyword z-control z-rust">if</span> <span class="z-variable z-language z-rust">self</span><span class="z-punctuation z-accessor z-dot z-rust">.</span>pause<span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">load</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-meta z-path z-rust">Ordering<span class="z-punctuation z-accessor z-rust">::</span></span>Relaxed</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span> <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">            <span class="z-keyword z-control z-rust">break</span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">        </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">    </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span></span>
+</span></code></pre>
+<h2 id="threads-step-3-top-level-coordination"><a class="zola-anchor" href="#threads-step-3-top-level-coordination" aria-label="Anchor link for: threads-step-3-top-level-coordination">&num;</a>
+Threads Step 3: Top-Level Coordination</h2>
+<p>The main thread starts and stops all of the render threads using the senders stored in <code>passes_wanted_txs</code> and the <code>pause</code> flag.
+Once per frame it does the following steps:</p>
+<ol>
+<li>Start each render thread by sending the number of passes wanted through each sender in <code>passes_wanted_txs</code>.</li>
+<li>Sleep for most of the duration of the current frame.</li>
+<li>Set the <code>pause</code> flag to stop any of the render threads still in the middle of their render loops.</li>
+<li>Read back the number of render passes completed by each render thread via <code>passes_done_rxs</code>.</li>
+<li>If all render threads have completed the number of render passes wanted, increment that number to start the next render pass the next time around.</li>
+<li>Unset the <code>pause</code> flag for the next time around.</li>
+</ol>
+<p>Here's the code for this:</p>
+<pre data-lang="rust" class="language-rust z-code"><code class="language-rust" data-lang="rust"><span class="z-source z-rust"><span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> Camera::render method, called in the main non-render thread.
+</span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-function z-rust"><span class="z-storage z-modifier z-rust">pub</span> <span class="z-storage z-type z-function z-rust">fn</span> </span><span class="z-entity z-name z-function z-rust">render</span></span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-begin z-rust">(</span><span class="z-keyword z-operator z-rust">&amp;</span><span class="z-storage z-modifier z-rust">mut</span> <span class="z-variable z-parameter z-rust">self</span>, <span class="z-variable z-parameter z-rust">until</span><span class="z-punctuation z-separator z-rust">:</span> Instant</span><span class="z-meta z-function z-rust"><span class="z-meta z-function z-parameters z-rust"><span class="z-punctuation z-section z-parameters z-end z-rust">)</span></span></span></span><span class="z-meta z-function z-rust"> </span><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> Request no more than `self.passes_wanted` render passes from view threads.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-keyword z-control z-rust">for</span> passes_wanted_tx <span class="z-keyword z-operator z-rust">in</span> <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span><span class="z-variable z-language z-rust">self</span><span class="z-punctuation z-accessor z-dot z-rust">.</span>passes_wanted_txs <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">        passes_wanted_tx
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">            <span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">send</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-variable z-language z-rust">self</span><span class="z-punctuation z-accessor z-dot z-rust">.</span>passes_wanted</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">            <span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">expect</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-string z-quoted z-double z-rust"><span class="z-punctuation z-definition z-string z-begin z-rust">&quot;</span>passes_wanted_tx<span class="z-punctuation z-definition z-string z-end z-rust">&quot;</span></span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">    </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> Sleep up to `until`, then pause any currently-rendering view threads.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-type z-rust">let</span> now <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-meta z-path z-rust">Instant<span class="z-punctuation z-accessor z-rust">::</span></span>now<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-keyword z-control z-rust">if</span> until <span class="z-keyword z-operator z-comparison z-rust">&gt;</span> now <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">        <span class="z-meta z-path z-rust">std<span class="z-punctuation z-accessor z-rust">::</span></span><span class="z-meta z-path z-rust">thread<span class="z-punctuation z-accessor z-rust">::</span></span>sleep<span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>until<span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">saturating_duration_since</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span>now</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">    </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-variable z-language z-rust">self</span><span class="z-punctuation z-accessor z-dot z-rust">.</span>pause<span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">store</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-language z-rust">true</span><span class="z-punctuation z-separator z-rust">,</span> <span class="z-meta z-path z-rust">Ordering<span class="z-punctuation z-accessor z-rust">::</span></span>Relaxed</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> Gather passes done by all the view threads.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-storage z-type z-rust">let</span> <span class="z-storage z-modifier z-rust">mut</span> all_passes_done <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-constant z-language z-rust">true</span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-keyword z-control z-rust">for</span> passes_done_rx <span class="z-keyword z-operator z-rust">in</span> <span class="z-keyword z-operator z-bitwise z-rust">&amp;</span><span class="z-variable z-language z-rust">self</span><span class="z-punctuation z-accessor z-dot z-rust">.</span>passes_done_rxs <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">        <span class="z-storage z-type z-rust">let</span> this_passes_done <span class="z-keyword z-operator z-assignment z-rust">=</span> passes_done_rx<span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">recv</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">expect</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-string z-quoted z-double z-rust"><span class="z-punctuation z-definition z-string z-begin z-rust">&quot;</span>passes_done_rx<span class="z-punctuation z-definition z-string z-end z-rust">&quot;</span></span></span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">        <span class="z-keyword z-control z-rust">if</span> this_passes_done <span class="z-keyword z-operator z-comparison z-rust">&lt;</span> <span class="z-variable z-language z-rust">self</span><span class="z-punctuation z-accessor z-dot z-rust">.</span>passes_wanted <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">            all_passes_done <span class="z-keyword z-operator z-assignment z-rust">=</span> <span class="z-constant z-language z-rust">false</span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">        </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">    </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> Increment `self.passes_wanted` if all threads have finished this pass.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-keyword z-control z-rust">if</span> all_passes_done <span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-begin z-rust">{</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">        <span class="z-variable z-language z-rust">self</span><span class="z-punctuation z-accessor z-dot z-rust">.</span>passes_wanted <span class="z-keyword z-operator z-assignment z-rust">+=</span> <span class="z-constant z-numeric z-integer z-decimal z-rust">1</span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"><span class="z-meta z-block z-rust">    </span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-comment z-line z-double-slash z-rust"><span class="z-punctuation z-definition z-comment z-rust">//</span> Prepare to let view threads render again.
+</span></span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust">    <span class="z-variable z-language z-rust">self</span><span class="z-punctuation z-accessor z-dot z-rust">.</span>pause<span class="z-punctuation z-accessor z-dot z-rust">.</span><span class="z-support z-function z-rust">store</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-begin z-rust">(</span><span class="z-constant z-language z-rust">false</span><span class="z-punctuation z-separator z-rust">,</span> <span class="z-meta z-path z-rust">Ordering<span class="z-punctuation z-accessor z-rust">::</span></span>Relaxed</span><span class="z-meta z-group z-rust"><span class="z-punctuation z-section z-group z-end z-rust">)</span></span><span class="z-punctuation z-terminator z-rust">;</span>
+</span></span></span><span class="z-source z-rust"><span class="z-meta z-function z-rust"><span class="z-meta z-block z-rust"></span><span class="z-meta z-block z-rust"><span class="z-punctuation z-section z-block z-end z-rust">}</span></span></span>
+</span></code></pre>
+<p>Doing all of this gives the main thread enough control over the render threads to start the next render pass only when previously-requested render passes have been completed by all of the threads.</p>
+<p>Stopping for all of the render threads like this also ensures that all the pixel buffers are available for uploading as texture data for display.</p>
+<h2 id="wrapping-up"><a class="zola-anchor" href="#wrapping-up" aria-label="Anchor link for: wrapping-up">&num;</a>
+Wrapping Up</h2>
+<p>So how did it all turn out?
+This multi-threaded enhancement to the single-threaded Rust ray tracer ended up speeding up rendering by about 2.5 times, even on my modest hardware.
+The speed difference is even more noticeable compared to my first C++ version, beating it out by a factor of 4 times, according to my (unscientific) timings!</p>
+<p>My attempts to add multi-threading to my C++ ray tracer didn't get very far;
+Rust's type system guided most of the design of the data sharing and algorithms here, which is likely why this all went as well as it did.</p>
+<p>There is some performance left on the table here:
+the work to be done isn't divided evenly, so some threads are left twiddling their thumbs while others lag behind.
+Perhaps some sort of row-granular job queue would address this, but I like the relative simplicity of my current approach here.</p>
+<p>The source code for all of this can be found here: <a href="https://github.com/tung/raytracing">https://github.com/tung/raytracing</a></p>
+
+    
+  </article>
+  <nav class="bottom-nav">
+    
+    
+    
+    <p><a href="..">&LeftArrow; More Posts</a></p>
+  </nav>
+
+  <footer>
+    Made with <a href="https://www.getzola.org">Zola</a>.
+  </footer>
+</body>
+
+</html>

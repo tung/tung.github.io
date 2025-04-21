@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="Programming, game development and other technical tidbits">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NetHack | Tung&#x27;s Word Box</title>
+  <link rel="icon" href="https://tung.github.io/favicon.png" type="image/png" sizes="any">
+  <link rel="stylesheet" href="https://tung.github.io/tufte.css">
+  <link rel="stylesheet" href="https://tung.github.io/site.css">
+  
+    <link rel="alternate" type="application/atom+xml" title="Tung&#x27;s Word Box" href="https://tung.github.io/atom.xml">
+  
+</head>
+
+<body>
+  <header>
+    <div class="home">
+      <a href="https://tung.github.io">Tung&#x27;s Word Box</a>
+    </div>
+    <nav>
+      <a href="https://tung.github.io/posts/">Posts</a>
+      <a href="https://tung.github.io/tags/">Tags</a>
+      <a href="https://tung.github.io/projects/">Projects</a>
+      <a href="https://github.com/tung">GitHub</a>
+      <a href="https://tungtn.itch.io">itch.io</a>
+    </nav>
+    <div style="clear: both"></div>
+  </header>
+
+  
+  <h1>NetHack</h1>
+  <article>
+    <p>
+      <strong>Role:</strong>
+      Upstream bug fixes; developed mods in various personal forks.
+    </p>
+    <p>
+      <strong>Last involved:</strong>
+      
+    Early
+  2016
+
+    </p>
+    
+<figure>
+  <a href="&#x2F;projects&#x2F;nethack&#x2F;nethack-343-screenshot.png"><img src="https:&#x2F;&#x2F;tung.github.io&#x2F;processed_images&#x2F;nethack-343-screenshot.cde88f2e6638875e.png" alt="NetHack screenshot" title="NetHack screenshot"></a>
+</figure>
+<p>NetHack is a classic fantasy roguelike game; one of the most famous and venerable of its kind, with scores of contributors over a development history stretching back to its first release in 1987.
+The player takes on the role of an adventurer sent on a divine quest to retrieve the fabled Amulet of Yendor, hidden deep in the firey pits of Gehennom below the perilous and ever-shifting Dungeons of Doom.</p>
+<span id="continue-reading"></span>
+<p>As a roguelike, NetHack continues in the biggest traditions of its genre.
+<em>Permanent death</em> prevents players from saving and reloading their way out of trouble, forcing them to think on their feet.
+Meanwhile, <em>procedural content generation</em> all but guarantees that no two journeys into the Dungeons of Doom are met with quite the same levels, monsters, items and situations.</p>
+<p>NetHack is notable amongst roguelikes for a number of reasons:</p>
+<ul>
+<li>Players can choose amongst thirteen different roles, five races and three alignments.</li>
+<li>Hundreds of different items, many with unique magical effects.</li>
+<li>Hundreds of monsters, ranging from the lowly newt all the way up to angels and demon lords.</li>
+<li>Dozens of unique locations spanning castles, towns, swamps, seas, fortresses, temples and more.</li>
+<li>A rich and diverse ruleset governing how everything in the game interacts with everything else;
+for example, a player can blind a pursuing foe with a flash of light, and strike the drawbridge that they stumble onto with force bolt to plunge them into the waters below.
+A game of NetHack is as much an adventure with a story as it is hack-and-slash experience.</li>
+</ul>
+<h2 id="contributions">Contributions</h2>
+<p>The current version of NetHack includes a couple of bug fixes that can be attributed to me:</p>
+<ul>
+<li>An important improvement to pathfinding for fleeing monsters in narrow corridors.</li>
+<li>A fix for confusion over the ownership of items in containers dropped by the player in a shop.</li>
+</ul>
+<p>My NetHack variant <a href="https://tung.github.io/projects/dynahack/">DynaHack</a> is credited in the official <a href="https://nethack.org/v366/Guidebook.html">NetHack Guidebook</a> as one of the variants that helped maintain interest in NetHack during the long release cycle spanning NetHack 3.4.3 in 2003 and NetHack 3.6.0 in 2015.</p>
+<h2 id="personal-forks">Personal Forks</h2>
+<p>I have a few forks of the NetHack source code where I've made modifications to the game.</p>
+<h3 id="naohack-fork">NAOHack Fork</h3>
+<p>Before the release of NetHack 3.6.0, the most-played version of NetHack was the one hosted on the alt.org public server.
+Dubbed "NAOHack" by many players, this version was lightly patched relative to NetHack 3.4.3 to support server play, and could be considered a "polished" version of it.</p>
+<p>I made a fork of NAOHack to add some quality-of-life improvements and fixes while still keeping the original NetHack 3.4.3 feeling:</p>
+<ul>
+<li>Dungeon map overview (press <code>Ctrl-O</code> to bring it up).</li>
+<li>Dark room patch.</li>
+<li>Colored walls and floor (enhanced).</li>
+<li>Autopickup ignores manually-dropped items.</li>
+<li>Autopickup exceptions can filter shop items.</li>
+<li>Auto-open doors.</li>
+<li>Auto-unlock for doors and containers.</li>
+<li>Auto-loot after auto-unlocking containers.</li>
+<li><code>safe_peaceful</code> option to <code>#chat</code> to peaceful monsters by default instead of trying to attack them.</li>
+<li><code>pilesize</code> option to reduce/suppress "Things that are here" window when walking on item piles.</li>
+<li>Fix travel command in Sokoban branch.</li>
+<li>Allow 'W'ear and 'T'ake off on rings, amulets and blindfolds (<code>wear_unified</code> option).</li>
+<li>Allow TTY text windows to be scrolled backwards (<code>&lt;</code>, <code>&gt;</code>, <code>^</code> and <code>|</code> navigation keys).</li>
+<li>Interrupt multi-turn actions when HP/Pw is restored, enhanced so running/travel ignore it.</li>
+<li>Stop running/travel when becoming hungry or weak from hunger.</li>
+<li>Fix for the infinite travel bug.</li>
+</ul>
+<p>All of the above can be found on the <a href="https://github.com/tung/NAOHack/tree/patches"><code>patches</code> branch</a> of <a href="https://github.com/tung/NAOHack">my NAOHack fork on GitHub</a>.</p>
+<h3 id="nethack-3-6-0-statuscolors-fork">NetHack 3.6.0 <code>statuscolors</code> Fork</h3>
+<p>NAOHack included a community patch called <code>statuscolors</code> that allowed players to add configurable colors the otherwise monochrome numbers and labels in the game's status area; this was often used to draw attention to it when the player was in danger.</p>
+<p>When NetHack 3.6.0 was released, it shipped a similar feature that it called "Status Hilites".
+Status hilites was unfortunately inferior to the community <code>statuscolors</code> patch: not only was its configuration syntax incompatible, it was unable to express highlighting criteria that <code>statuscolors</code> supported out-of-the-box.</p>
+<p>This spurred me to create <code>statuscolors2</code>: a version of the <code>statuscolors</code> patch that not only worked with the newly-released NetHack 3.6.0, but also enhanced it in a number of ways:</p>
+<ul>
+<li>Full rule syntax compatibility with the previous <code>statuscolors</code> patch; useful for configuration files with many existing rules.</li>
+<li>Support all of the numeric status fields, not just "HP" and "Pw".</li>
+<li>Allow one-turn highlighting of numbers that change between turns.</li>
+<li>Brand new in-game customization menu, further enhanced with an export function to allow copying and pasting rules from the game to a configuration file.</li>
+</ul>
+<p>I bundled this together with hit point bar coloring, culminating in the creation of the <a href="https://bilious.alt.org/?477">Statuscolors and hitpointbar 2 patch</a> that I submitted to the NetHack Patch Database.
+The NetHack Dev Team eventually improved their in-house status hilites system, and everybody updated their configuration files to match the new syntax, rendering this patch mostly redundant.
+The development of this patch is preserved in this fork for historical reasons.</p>
+<p><a href="https://github.com/tung/nethack360-statuscolors/tree/statuscolors2">My NetHack 3.6.0 fork with <code>statuscolors2</code> patch development on GitHub.</a></p>
+<h3 id="nethack-3-6-0-post-release-patches-fork">NetHack 3.6.0 Post-Release Patches Fork</h3>
+<p>I created a fork of NetHack 3.6.0 not long after its release to house enhancements and fixes that I felt were suitable for upstream inclusion.
+Each change is contained in its own branch:</p>
+<p><strong><code>win-neutral-statuscolors-hitpointbar</code></strong>: The aforementioned Statuscolors and hitpointbar 2 patch in branch form.</p>
+<p><strong><code>tty-menu-enhancements</code></strong>: Prevent the <code>&gt;</code> key from closing menus in the TTY windowport, so the <code>&lt;</code> and <code>&gt;</code> keys can be safely used to change menu pages.</p>
+<p><strong><code>tty-full-text-scroll</code></strong>: Allow full text windows, such as the message history and help windows, to be navigated backwards and forwards by page, instead of just forwards.
+The <code>&lt;</code>, <code>&gt;</code>, <code>^</code> and <code>|</code> keys work like <code>PgUp</code>, <code>PgDn</code>, <code>Home</code> and <code>End</code> respectively in such windows.</p>
+<p><strong><code>attack-mode-option</code></strong>: Adds an <code>attack_mode</code> option with the following values and behaviors:</p>
+<ul>
+<li><code>p - pacifist</code>: don't fight anything</li>
+<li><code>c - chat</code>: chat with peaceful monsters, fight hostiles (default)</li>
+<li><code>a - ask</code>: ask to fight peaceful monsters, fight hostiles</li>
+<li><code>f - fightall</code>: fight peaceful and hostile monsters without asking</li>
+</ul>
+<p><strong><code>quest-artifact-stealing-fix</code></strong>: Stop the Wizard of Yendor from stealing the quest artifact of the player's current role.</p>
+<p><strong><code>map-coloring</code></strong>: Add thematic coloring for branches, special levels, rooms and dungeon features in the TTY windowport.
+Adapted from <a href="http://bilious.alt.org/?296">L's Coloured Walls and Floor v1 patch</a>, but for NetHack 3.6.0.</p>
+<p><strong><code>general-main-daemon-fix</code></strong>: Fix mail daemons being randomly generated on special levels that place random demons;
+the fix is generalized for any requested class of monsters that are all flagged to not be randomly spawned.</p>
+<p><strong><code>infinite-travel-fix</code></strong>: Fixes a bug where the automatic travel system will waste hundreds of turn oscillating while trying and failing to reach its destination.</p>
+<p><a href="https://github.com/tung/NetHack">My NetHack 3.6.0 post-release patches fork on GitHub</a> and the <a href="https://github.com/tung/NetHack/branches/all">list of branches</a> mentioned above.</p>
+<h2 id="more-information">More Information</h2>
+<ul>
+<li><a href="https://nethack.org/">Official NetHack website</a></li>
+<li><a href="https://nethackwiki.com/wiki/Main_Page">NetHack Wiki</a></li>
+<li><a href="https://alt.org/nethack/">Public NetHack server at alt.org</a></li>
+<li><a href="https://www.hardfought.org/">Public NetHack server at Hardfought</a></li>
+</ul>
+
+  </article>
+  <nav class="bottom-nav">
+    
+    <p><a href="&#x2F;projects&#x2F;">&LeftArrow; More Projects</a></p>
+  </nav>
+
+  <footer>
+    Made with <a href="https://www.getzola.org">Zola</a>.
+  </footer>
+</body>
+
+</html>

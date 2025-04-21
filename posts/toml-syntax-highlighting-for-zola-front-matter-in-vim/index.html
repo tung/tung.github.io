@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="Programming, game development and other technical tidbits">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TOML Syntax Highlighting for Zola Front Matter in Vim | Tung&#x27;s Word Box</title>
+  <link rel="icon" href="https://tung.github.io/favicon.png" type="image/png" sizes="any">
+  <link rel="stylesheet" href="https://tung.github.io/tufte.css">
+  <link rel="stylesheet" href="https://tung.github.io/site.css">
+  
+    <link rel="alternate" type="application/atom+xml" title="Tung&#x27;s Word Box" href="https://tung.github.io/atom.xml">
+  
+</head>
+
+<body>
+  <header>
+    <div class="home">
+      <a href="https://tung.github.io">Tung&#x27;s Word Box</a>
+    </div>
+    <nav>
+      <a href="https://tung.github.io/posts/">Posts</a>
+      <a href="https://tung.github.io/tags/">Tags</a>
+      <a href="https://tung.github.io/projects/">Projects</a>
+      <a href="https://github.com/tung">GitHub</a>
+      <a href="https://tungtn.itch.io">itch.io</a>
+    </nav>
+    <div style="clear: both"></div>
+  </header>
+
+  
+  <h1>TOML Syntax Highlighting for Zola Front Matter in Vim</h1>
+  <article>
+    
+    
+    <p class="meta">
+        Posted on 2022-07-29; 
+        Tags:
+        <span class="tags">
+              <a href="https://tung.github.io/tags/static-site-generation/">static-site-generation</a>,
+              <a href="https://tung.github.io/tags/vim/">vim</a>,
+              <a href="https://tung.github.io/tags/webdev/">webdev</a>,
+              <a href="https://tung.github.io/tags/zola/">zola</a>
+        </span>
+    </p>
+    <br>
+    <p>If you use <a href="https://www.getzola.org">Zola</a> and use Vim to edit Markdown files in your <code>content</code> directory, you may notice that the TOML front matter meta-data at the top of the file isn't syntax highlighted.
+If you already have <a href="https://github.com/toml-lang/toml/wiki#editor-support">TOML syntax highlighting</a> set up for Vim, you can fix that with the following configuration:</p>
+<pre data-lang="vim" class="language-vim z-code"><code class="language-vim" data-lang="vim"><span class="z-source z-viml">unlet <span class="z-variable z-other z-viml">b:current_syntax</span>
+</span><span class="z-source z-viml">syntax include <span class="z-variable z-other z-viml">@Toml</span> syntax/toml<span class="z-storage z-function z-viml">.</span>vim
+</span><span class="z-source z-viml">syntax region tomlFrontMatter start=<span class="z-string z-regexp z-viml">/\%^+++$/</span> <span class="z-keyword z-control z-viml">end</span>=<span class="z-string z-regexp z-viml">/^+++$/</span> contains=<span class="z-variable z-other z-viml">@Toml</span>
+</span></code></pre>
+<p>Put this in <code>~/.vim/after/syntax/markdown.vim</code> and the TOML front matter in your Markdown files should now be syntax highlighted.</p>
+<p>The <code>unlet</code> line is needed for the file inclusion on the next line to work properly.</p>
+<p>The <code>syntax include</code> line creates a <em>cluster</em> named <code>@Toml</code> that contains every syntax rule in all paths ending with <code>syntax/toml.vim</code> that Vim can find in its runtime path list.</p>
+<p>The <code>syntax region</code> line denotes a Vim syntax region that we've chosen to name <code>tomlFrontMatter</code>.
+The region starts if the very first line of the file matches <code>+++</code>, and continues until a <code>+++</code> line is found.
+The whole region is marked as containing the <code>@Toml</code> cluster from the previous line.</p>
+<p>As a bonus, you can accomplish the same thing for YAML front matter in Jekyll with a similar configuration:</p>
+<pre data-lang="vim" class="language-vim z-code"><code class="language-vim" data-lang="vim"><span class="z-source z-viml">unlet <span class="z-variable z-other z-viml">b:current_syntax</span>
+</span><span class="z-source z-viml">syntax include <span class="z-variable z-other z-viml">@Yaml</span> syntax/yaml<span class="z-storage z-function z-viml">.</span>vim
+</span><span class="z-source z-viml">syntax region yamlFrontMatter start=<span class="z-string z-regexp z-viml">/\%^---$/</span> <span class="z-keyword z-control z-viml">end</span>=<span class="z-string z-regexp z-viml">/^---$/</span> contains=<span class="z-variable z-other z-viml">@Yaml</span>
+</span></code></pre>
+<p>Both of these configurations can co-exist in the same file too, applying either TOML or YAML syntax highlighting depending on whether <code>+++</code> or <code>---</code> is present at the top of the file.</p>
+
+    
+  </article>
+  <nav class="bottom-nav">
+    
+    
+    
+    <p><a href="..">&LeftArrow; More Posts</a></p>
+  </nav>
+
+  <footer>
+    Made with <a href="https://www.getzola.org">Zola</a>.
+  </footer>
+</body>
+
+</html>

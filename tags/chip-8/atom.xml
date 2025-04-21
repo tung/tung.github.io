@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title>Tung&#x27;s Word Box - chip-8</title>
+    <subtitle>Programming, game development and other technical tidbits</subtitle>
+    <link rel="self" type="application/atom+xml" href="https://tung.github.io/tags/chip-8/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://tung.github.io"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2023-02-07T00:00:00+00:00</updated>
+    <id>https://tung.github.io/tags/chip-8/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Making a CHIP-8 Interpreter: chip8run</title>
+        <published>2023-02-07T00:00:00+00:00</published>
+        <updated>2023-02-07T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              tungtn
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://tung.github.io/posts/making-a-chip-8-interpreter-chip8run/"/>
+        <id>https://tung.github.io/posts/making-a-chip-8-interpreter-chip8run/</id>
+        
+        <summary type="html">&lt;p&gt;I wanted to try my hand at making interactive graphical applications with C, WebAssemnbly and the &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;floooh&#x2F;sokol&quot;&gt;Sokol&lt;&#x2F;a&gt; header-only libraries when I stumbled across the &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;CHIP-8&quot;&gt;CHIP-8&lt;&#x2F;a&gt;.
+Creating a CHIP-8 interpreter (&quot;emulator&quot;) was as good an excuse as any to scratch my itch, and a little while later I ended up with &lt;a href=&quot;https:&#x2F;&#x2F;tung.github.io&#x2F;chip8run&#x2F;&quot;&gt;&lt;strong&gt;chip8run&lt;&#x2F;strong&gt;&lt;&#x2F;a&gt;, which you can try online right now.&lt;&#x2F;p&gt;
+</summary>
+        
+    </entry>
+</feed>

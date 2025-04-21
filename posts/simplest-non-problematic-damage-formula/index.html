@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="Programming, game development and other technical tidbits">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>The Simplest Non-Problematic Damage Formula | Tung&#x27;s Word Box</title>
+  <link rel="icon" href="https://tung.github.io/favicon.png" type="image/png" sizes="any">
+  <link rel="stylesheet" href="https://tung.github.io/tufte.css">
+  <link rel="stylesheet" href="https://tung.github.io/site.css">
+  
+    <link rel="alternate" type="application/atom+xml" title="Tung&#x27;s Word Box" href="https://tung.github.io/atom.xml">
+  
+</head>
+
+<body>
+  <header>
+    <div class="home">
+      <a href="https://tung.github.io">Tung&#x27;s Word Box</a>
+    </div>
+    <nav>
+      <a href="https://tung.github.io/posts/">Posts</a>
+      <a href="https://tung.github.io/tags/">Tags</a>
+      <a href="https://tung.github.io/projects/">Projects</a>
+      <a href="https://github.com/tung">GitHub</a>
+      <a href="https://tungtn.itch.io">itch.io</a>
+    </nav>
+    <div style="clear: both"></div>
+  </header>
+
+  
+  <h1>The Simplest Non-Problematic Damage Formula</h1>
+  <article>
+    
+    
+    <p class="meta">
+        Posted on 2022-08-02; 
+        Tags:
+        <span class="tags">
+              <a href="https://tung.github.io/tags/game-design/">game-design</a>,
+              <a href="https://tung.github.io/tags/gamedev/">gamedev</a>
+        </span>
+    </p>
+    <br>
+    <p>If you're designing a game with numeric hit points, attack and defense values, you'll eventually have to decide on a <em>damage formula</em> that determines the relationship between them.
+The simplest approach possible is to calculate damage as just the difference between attack and defense; that is:</p>
+<pre class="z-code"><code><span class="z-text z-plain">damage = attack - defense;
+</span></code></pre>
+<p>It's as simple as can be, but it has problems.
+The above formula only produces satisfying damage values if attack is higher than defense.
+Worse, damage will be zero if attack and defense are equal!
+How can we fix this?</p>
+<span id="continue-reading"></span>
+<p>We can deal with the issue of attack needing to be much higher than defense by just doubling the attack value, like so:</p>
+<pre class="z-code"><code><span class="z-text z-plain">damage = attack * 2 - defense;
+</span></code></pre>
+<p>The nice thing about this formula is that if the attack and defense values are equal, the damage value will be equal as well.</p>
+<p>The issue with zero damage still exists, though now it happens when the attack value is half the defense value; as is, we're just kicking the can down the road.
+As it turns out, there's a completely different damage formula that produces non-zero damage values for all non-zero attack values, while still reducing damage for increasing defense values.
+Here it is:</p>
+<pre class="z-code"><code><span class="z-text z-plain">damage = attack * attack / defense;
+</span></code></pre>
+<p>In the above formula, when attack and defense are equal, the damage value will be equal to the attack value.
+The issue with this formula is that if the attack value becomes much higher than the defense value, the damage value will skyrocket!</p>
+<p>The solution to this whole mess is simple: take the difference formula and the squaring formula, and combine them.
+Behold, <em>the simplest non-problematic damage formula!</em></p>
+<pre class="z-code"><code><span class="z-text z-plain">if (attack &gt;= defense) {
+</span><span class="z-text z-plain">    damage = attack * 2 - defense;
+</span><span class="z-text z-plain">} else {
+</span><span class="z-text z-plain">    damage = attack * attack / defense;
+</span><span class="z-text z-plain">}
+</span></code></pre>
+<p>We use the difference formula when attack is greater than or equal to defense since it doesn't blow up like the squaring formula.
+When attack is low relative to defense, we switch to the squaring formula to all but guarantee that we get non-zero damage while attack itself is non-zero.<label for="note-1" class="margin-toggle sidenote-number"></label><input type="checkbox" id="note-1" class="margin-toggle"/><span class="sidenote">If you're using integer division, attack values below the square root of defense can still round down to zero.</span></p>
+<p>You might argue that stitching two formulas together like this doesn't really count as <em>a</em> formula, and be tempted to search for or invent a single formula that solves everything.
+Unfortunately, you won't find one, because <em>every formula breaks at its extremes</em>.
+Even if you find or invent a single formula that seems good at first, it will often impose hard ranges of "good" values for attack and defense to avoid blowing up the damage value.
+Special-casing damage formulas is the norm in all but the simplest damage systems in game design, so don't feel bad for reaching for branching logic.</p>
+<p>Finally, feel free to garnish the damage value here.
+For example, you can scale it up for skill levels, critical hits and weaknesses, or scale it down for resistances and situational defenses.</p>
+
+    
+  </article>
+  <nav class="bottom-nav">
+    
+    
+    
+    <p><a href="..">&LeftArrow; More Posts</a></p>
+  </nav>
+
+  <footer>
+    Made with <a href="https://www.getzola.org">Zola</a>.
+  </footer>
+</body>
+
+</html>

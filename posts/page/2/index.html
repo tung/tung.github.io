@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="Programming, game development and other technical tidbits">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Posts | Page 2 of 2 | Tung&#x27;s Word Box</title>
+  <link rel="icon" href="https://tung.github.io/favicon.png" type="image/png" sizes="any">
+  <link rel="stylesheet" href="https://tung.github.io/tufte.css">
+  <link rel="stylesheet" href="https://tung.github.io/site.css">
+  
+  
+    <link rel="alternate" type="application/atom+xml" title="Tung&#x27;s Word Box" href="https://tung.github.io/atom.xml">
+  
+  <link rel="alternate" type="application/atom+xml" title="Tung&#x27;s Word Box - Posts" href="/posts/atom.xml">
+
+</head>
+
+<body>
+  <header>
+    <div class="home">
+      <a href="https://tung.github.io">Tung&#x27;s Word Box</a>
+    </div>
+    <nav>
+      <a href="https://tung.github.io/posts/">Posts</a>
+      <a href="https://tung.github.io/tags/">Tags</a>
+      <a href="https://tung.github.io/projects/">Projects</a>
+      <a href="https://github.com/tung">GitHub</a>
+      <a href="https://tungtn.itch.io">itch.io</a>
+    </nav>
+    <div style="clear: both"></div>
+  </header>
+
+  
+  <h1>Posts</h1>
+
+  
+    
+      
+  <h2><a href="&#x2F;posts&#x2F;rust-and-webassembly-without-a-bundler&#x2F;">Rust and WebAssembly without a Bundler</a></h2>
+  <article>
+    
+    <p class="meta">
+        Posted on 2022-08-04, 
+        Updated 2022-08-06; 
+        Tags:
+        <span class="tags">
+              <a href="https://tung.github.io/tags/javascript/">javascript</a>,
+              <a href="https://tung.github.io/tags/programming/">programming</a>,
+              <a href="https://tung.github.io/tags/rust/">rust</a>,
+              <a href="https://tung.github.io/tags/webassembly/">webassembly</a>,
+              <a href="https://tung.github.io/tags/webdev/">webdev</a>
+        </span>
+    </p>
+    
+      
+    <p>If you're just getting into compiling your Rust code into WebAssembly and want to load it in a web browser, you might be taken aback by the multitude of ways of doing so.
+This seems to be due to the differing pace of web browsers implementing web platform features over the years.
+A lot of entry-level guides to using Rust and WebAssembly make use of a JavaScript bundler for convenience, but this obscures the relationship between Rust, WebAssembly, JavaScript and HTML, so instead we're going to try doing this all by hand.
+Specifically, we're going to compile some Rust code into WebAssembly and do a run-down of the ways to load it directly in a web page using just JavaScript.
+If you want to follow along at home, make sure you have Rust installed and the <code>wasm32-unknown-unknown</code> target:</p>
+<pre class="z-code"><code><span class="z-text z-plain">rustup target add wasm32-unknown-unknown
+</span></code></pre>
+<p>We're going to look at these loading methods through the perspective of compatibility with three desktop web browsers: Chrome, Firefox and Safari.
+I'll be consulting the extremely-helpful <a href="https://caniuse.com">Can I use</a> website for this info.</p>
+<p>Ready?
+Okay, let's go!</p>
+    <p class="meta"><a href="&#x2F;posts&#x2F;rust-and-webassembly-without-a-bundler&#x2F;">(Read more)</a></p>
+
+    
+  </article>
+
+    
+      
+  <h2><a href="&#x2F;posts&#x2F;simplest-non-problematic-damage-formula&#x2F;">The Simplest Non-Problematic Damage Formula</a></h2>
+  <article>
+    
+    <p class="meta">
+        Posted on 2022-08-02; 
+        Tags:
+        <span class="tags">
+              <a href="https://tung.github.io/tags/game-design/">game-design</a>,
+              <a href="https://tung.github.io/tags/gamedev/">gamedev</a>
+        </span>
+    </p>
+    
+      
+    <p>If you're designing a game with numeric hit points, attack and defense values, you'll eventually have to decide on a <em>damage formula</em> that determines the relationship between them.
+The simplest approach possible is to calculate damage as just the difference between attack and defense; that is:</p>
+<pre class="z-code"><code><span class="z-text z-plain">damage = attack - defense;
+</span></code></pre>
+<p>It's as simple as can be, but it has problems.
+The above formula only produces satisfying damage values if attack is higher than defense.
+Worse, damage will be zero if attack and defense are equal!
+How can we fix this?</p>
+    <p class="meta"><a href="&#x2F;posts&#x2F;simplest-non-problematic-damage-formula&#x2F;">(Read more)</a></p>
+
+    
+  </article>
+
+    
+      
+  <h2><a href="&#x2F;posts&#x2F;toml-syntax-highlighting-for-zola-front-matter-in-vim&#x2F;">TOML Syntax Highlighting for Zola Front Matter in Vim</a></h2>
+  <article>
+    
+    <p class="meta">
+        Posted on 2022-07-29; 
+        Tags:
+        <span class="tags">
+              <a href="https://tung.github.io/tags/static-site-generation/">static-site-generation</a>,
+              <a href="https://tung.github.io/tags/vim/">vim</a>,
+              <a href="https://tung.github.io/tags/webdev/">webdev</a>,
+              <a href="https://tung.github.io/tags/zola/">zola</a>
+        </span>
+    </p>
+    
+      <p>If you use <a href="https://www.getzola.org">Zola</a> and use Vim to edit Markdown files in your <code>content</code> directory, you may notice that the TOML front matter meta-data at the top of the file isn't syntax highlighted.
+If you already have <a href="https://github.com/toml-lang/toml/wiki#editor-support">TOML syntax highlighting</a> set up for Vim, you can fix that with the following configuration:</p>
+<pre data-lang="vim" class="language-vim z-code"><code class="language-vim" data-lang="vim"><span class="z-source z-viml">unlet <span class="z-variable z-other z-viml">b:current_syntax</span>
+</span><span class="z-source z-viml">syntax include <span class="z-variable z-other z-viml">@Toml</span> syntax/toml<span class="z-storage z-function z-viml">.</span>vim
+</span><span class="z-source z-viml">syntax region tomlFrontMatter start=<span class="z-string z-regexp z-viml">/\%^+++$/</span> <span class="z-keyword z-control z-viml">end</span>=<span class="z-string z-regexp z-viml">/^+++$/</span> contains=<span class="z-variable z-other z-viml">@Toml</span>
+</span></code></pre>
+<p>Put this in <code>~/.vim/after/syntax/markdown.vim</code> and the TOML front matter in your Markdown files should now be syntax highlighted.</p>
+<p>The <code>unlet</code> line is needed for the file inclusion on the next line to work properly.</p>
+<p>The <code>syntax include</code> line creates a <em>cluster</em> named <code>@Toml</code> that contains every syntax rule in all paths ending with <code>syntax/toml.vim</code> that Vim can find in its runtime path list.</p>
+<p>The <code>syntax region</code> line denotes a Vim syntax region that we've chosen to name <code>tomlFrontMatter</code>.
+The region starts if the very first line of the file matches <code>+++</code>, and continues until a <code>+++</code> line is found.
+The whole region is marked as containing the <code>@Toml</code> cluster from the previous line.</p>
+<p>As a bonus, you can accomplish the same thing for YAML front matter in Jekyll with a similar configuration:</p>
+<pre data-lang="vim" class="language-vim z-code"><code class="language-vim" data-lang="vim"><span class="z-source z-viml">unlet <span class="z-variable z-other z-viml">b:current_syntax</span>
+</span><span class="z-source z-viml">syntax include <span class="z-variable z-other z-viml">@Yaml</span> syntax/yaml<span class="z-storage z-function z-viml">.</span>vim
+</span><span class="z-source z-viml">syntax region yamlFrontMatter start=<span class="z-string z-regexp z-viml">/\%^---$/</span> <span class="z-keyword z-control z-viml">end</span>=<span class="z-string z-regexp z-viml">/^---$/</span> contains=<span class="z-variable z-other z-viml">@Yaml</span>
+</span></code></pre>
+<p>Both of these configurations can co-exist in the same file too, applying either TOML or YAML syntax highlighting depending on whether <code>+++</code> or <code>---</code> is present at the top of the file.</p>
+
+    
+  </article>
+
+    
+    <nav id="pagination" class="bottom-nav" style="text-align: center">
+      <div><a href="&#x2F;posts&#x2F;">&Lt; Newest</a></div>
+      <div><a href="https:&#x2F;&#x2F;tung.github.io&#x2F;posts&#x2F;">&lt; Newer</a></div>
+      <div>Page 2 of 2</div>
+      <div class="inactive">Older &gt;</div>
+      <div class="inactive">Oldest &Gt;</div>
+    </nav>
+  
+
+  <footer>
+    Made with <a href="https://www.getzola.org">Zola</a>.
+  </footer>
+</body>
+
+</html>

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title>Tung&#x27;s Word Box - programming</title>
+    <subtitle>Programming, game development and other technical tidbits</subtitle>
+    <link rel="self" type="application/atom+xml" href="https://tung.github.io/tags/programming/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://tung.github.io"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2025-03-19T00:00:00+00:00</updated>
+    <id>https://tung.github.io/tags/programming/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Multi-Threaded Rust Ray Tracing Demo</title>
+        <published>2025-03-19T00:00:00+00:00</published>
+        <updated>2025-03-19T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              tungtn
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://tung.github.io/posts/multi-threaded-rust-ray-tracing-demo/"/>
+        <id>https://tung.github.io/posts/multi-threaded-rust-ray-tracing-demo/</id>
+        
+        <summary type="html">
+&lt;figure&gt;
+  &lt;a href=&quot;&amp;#x2F;posts&amp;#x2F;multi-threaded-rust-ray-tracing-demo&amp;#x2F;ray-tracing.png&quot;&gt;&lt;img src=&quot;https:&amp;#x2F;&amp;#x2F;tung.github.io&amp;#x2F;processed_images&amp;#x2F;ray-tracing.25c002aa6a97723f.png&quot; alt=&quot;Ray-traced scene with spheres rendered with multi-threaded Rust&quot; title=&quot;Ray-traced scene with spheres rendered with multi-threaded Rust&quot;&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;figure&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;raytracing.github.io&#x2F;books&#x2F;RayTracingInOneWeekend.html&quot;&gt;&lt;em&gt;Ray Tracing in One Weekend&lt;&#x2F;em&gt;&lt;&#x2F;a&gt; is a free online book that takes you through the process of programming a ray tracer from scratch.
+It starts by writing support code to do math with 3-element vectors, building up a 3D scene with spheres and adding materials, and finishing by rendering a large scene of spheres of various sizes and materials.&lt;&#x2F;p&gt;
+&lt;p&gt;The book provides source code in C++, which I followed directly my first time through.
+Having done that, I decided to get a little bolder and repeat the experiment with Rust.
+This went well enough that I went even further and added multi-threading to speed it up;
+the picture above is the result of letting this multi-threaded renderer run for a while.&lt;&#x2F;p&gt;
+&lt;p&gt;Anyway, this ended up being interesting enough to do a write-up about, so here it is;
+read on!&lt;&#x2F;p&gt;
+</summary>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Learning Zig&#x27;s Build System using raylib</title>
+        <published>2024-11-06T00:00:00+00:00</published>
+        <updated>2025-03-19T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              tungtn
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://tung.github.io/posts/learning-zigs-build-system-using-raylib/"/>
+        <id>https://tung.github.io/posts/learning-zigs-build-system-using-raylib/</id>
+        
+        <summary type="html">&lt;p&gt;&lt;strong&gt;Edit&lt;&#x2F;strong&gt;: Updated for Zig 0.14.0 and a version of raylib that works with it.&lt;&#x2F;p&gt;
+&lt;p&gt;I picked up some Zig recently and figured I&#x27;d take the chance to learn its build system using raylib.
+raylib already has pretty good community-maintained idiomatic Zig bindings, but we want to learn, so we&#x27;re going to do it the &quot;hard&quot; way instead.&lt;&#x2F;p&gt;
+&lt;p&gt;raylib has a &lt;code&gt;build.zig&lt;&#x2F;code&gt;, which means that it can be used directly with Zig&#x27;s package manager.
+Its C headers can also be translated into a Zig module that can be &lt;code&gt;@import&lt;&#x2F;code&gt;ed, thanks to Zig&#x27;s built-in C translator.&lt;&#x2F;p&gt;
+&lt;p&gt;Note: We will &lt;em&gt;not&lt;&#x2F;em&gt; be using &lt;code&gt;@cImport&lt;&#x2F;code&gt;, since it seems like it&#x27;ll be removed in future versions of Zig.&lt;&#x2F;p&gt;
+</summary>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Making a CHIP-8 Interpreter: chip8run</title>
+        <published>2023-02-07T00:00:00+00:00</published>
+        <updated>2023-02-07T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              tungtn
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://tung.github.io/posts/making-a-chip-8-interpreter-chip8run/"/>
+        <id>https://tung.github.io/posts/making-a-chip-8-interpreter-chip8run/</id>
+        
+        <summary type="html">&lt;p&gt;I wanted to try my hand at making interactive graphical applications with C, WebAssemnbly and the &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;floooh&#x2F;sokol&quot;&gt;Sokol&lt;&#x2F;a&gt; header-only libraries when I stumbled across the &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;CHIP-8&quot;&gt;CHIP-8&lt;&#x2F;a&gt;.
+Creating a CHIP-8 interpreter (&quot;emulator&quot;) was as good an excuse as any to scratch my itch, and a little while later I ended up with &lt;a href=&quot;https:&#x2F;&#x2F;tung.github.io&#x2F;chip8run&#x2F;&quot;&gt;&lt;strong&gt;chip8run&lt;&#x2F;strong&gt;&lt;&#x2F;a&gt;, which you can try online right now.&lt;&#x2F;p&gt;
+</summary>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>My Workflow for following Crafting Interpreters</title>
+        <published>2022-12-24T00:00:00+00:00</published>
+        <updated>2022-12-26T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              tungtn
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://tung.github.io/posts/my-workflow-for-following-crafting-interpreters/"/>
+        <id>https://tung.github.io/posts/my-workflow-for-following-crafting-interpreters/</id>
+        
+        <summary type="html">&lt;p&gt;I recently worked my way through Robert Nystrom&#x27;s &lt;a href=&quot;https:&#x2F;&#x2F;craftinginterpreters.com&quot;&gt;&lt;em&gt;Crafting Interpreters&lt;&#x2F;em&gt;&lt;&#x2F;a&gt;, which guides you through the process of making an interpreter for a scripting language.
+The book is made up of three parts: a short part describing Lox (the scripting language made for the book), a tree-walk interpreter written in Java and a bytecode virtual machine interpreter written in C.
+This post is about how I approached the last part.&lt;&#x2F;p&gt;
+&lt;p&gt;The book doesn&#x27;t recommend any specific setup or workflow, so you&#x27;re free to go with whatever you like.
+The rest of this post describes what I went with; all of the code can be found here: &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;tung&#x2F;clox&quot;&gt;https:&#x2F;&#x2F;github.com&#x2F;tung&#x2F;clox&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+</summary>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Rust and WebAssembly without a Bundler</title>
+        <published>2022-08-04T00:00:00+00:00</published>
+        <updated>2022-08-06T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              tungtn
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://tung.github.io/posts/rust-and-webassembly-without-a-bundler/"/>
+        <id>https://tung.github.io/posts/rust-and-webassembly-without-a-bundler/</id>
+        
+        <summary type="html">&lt;p&gt;If you&#x27;re just getting into compiling your Rust code into WebAssembly and want to load it in a web browser, you might be taken aback by the multitude of ways of doing so.
+This seems to be due to the differing pace of web browsers implementing web platform features over the years.
+A lot of entry-level guides to using Rust and WebAssembly make use of a JavaScript bundler for convenience, but this obscures the relationship between Rust, WebAssembly, JavaScript and HTML, so instead we&#x27;re going to try doing this all by hand.
+Specifically, we&#x27;re going to compile some Rust code into WebAssembly and do a run-down of the ways to load it directly in a web page using just JavaScript.
+If you want to follow along at home, make sure you have Rust installed and the &lt;code&gt;wasm32-unknown-unknown&lt;&#x2F;code&gt; target:&lt;&#x2F;p&gt;
+&lt;pre class=&quot;z-code&quot;&gt;&lt;code&gt;&lt;span class=&quot;z-text z-plain&quot;&gt;rustup target add wasm32-unknown-unknown
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;We&#x27;re going to look at these loading methods through the perspective of compatibility with three desktop web browsers: Chrome, Firefox and Safari.
+I&#x27;ll be consulting the extremely-helpful &lt;a href=&quot;https:&#x2F;&#x2F;caniuse.com&quot;&gt;Can I use&lt;&#x2F;a&gt; website for this info.&lt;&#x2F;p&gt;
+&lt;p&gt;Ready?
+Okay, let&#x27;s go!&lt;&#x2F;p&gt;
+</summary>
+        
+    </entry>
+</feed>

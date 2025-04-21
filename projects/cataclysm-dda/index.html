@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="Programming, game development and other technical tidbits">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cataclysm: Dark Days Ahead (mod) | Tung&#x27;s Word Box</title>
+  <link rel="icon" href="https://tung.github.io/favicon.png" type="image/png" sizes="any">
+  <link rel="stylesheet" href="https://tung.github.io/tufte.css">
+  <link rel="stylesheet" href="https://tung.github.io/site.css">
+  
+    <link rel="alternate" type="application/atom+xml" title="Tung&#x27;s Word Box" href="https://tung.github.io/atom.xml">
+  
+</head>
+
+<body>
+  <header>
+    <div class="home">
+      <a href="https://tung.github.io">Tung&#x27;s Word Box</a>
+    </div>
+    <nav>
+      <a href="https://tung.github.io/posts/">Posts</a>
+      <a href="https://tung.github.io/tags/">Tags</a>
+      <a href="https://tung.github.io/projects/">Projects</a>
+      <a href="https://github.com/tung">GitHub</a>
+      <a href="https://tungtn.itch.io">itch.io</a>
+    </nav>
+    <div style="clear: both"></div>
+  </header>
+
+  
+  <h1>Cataclysm: Dark Days Ahead (mod)</h1>
+  <article>
+    <p>
+      <strong>Role:</strong>
+      Upstream bug fixes; developed mods in personal fork.
+    </p>
+    <p>
+      <strong>Last involved:</strong>
+      
+    Late
+  2020
+
+    </p>
+    
+<figure>
+  <a href="&#x2F;projects&#x2F;cataclysm-dda&#x2F;cataclysm-dda-0.g-screenshot.png"><img src="https:&#x2F;&#x2F;tung.github.io&#x2F;processed_images&#x2F;cataclysm-dda-0.g-screenshot.dad0e7886c25e933.png" alt="Cataclysm: Dark Days Ahead 0.G screenshot" title="Cataclysm: Dark Days Ahead 0.G screenshot"></a>
+</figure>
+<p>Cataclysm: Dark Days Ahead is a turn-based survival game set in a post-apocalyptic world.
+Players must explore and survive while defending against zombies and countless other monstrosities in a limitless, procedurally-generated world.
+Items can be scavenged and crafted; structures built; farms cultivated; vehicles repaired and modified.
+The player can install advanced bionic enhancements, and even mutate.</p>
+<span id="continue-reading"></span><h2 id="upstream-bug-fixes">Upstream Bug Fixes</h2>
+<p>Cataclysm: Dark Days ahead is a highly-active open source project with hundreds of contributors over the years.
+My contributions to the upstream project are fairly minor:</p>
+<ul>
+<li>I traced the source of the mystery of fresh ingredients cooking into rotten food to an underflow error during calculations involving unsigned integers.</li>
+<li>I suggested the fix to reduce lightstrip duration from years (!!!) to days.</li>
+</ul>
+<h2 id="my-personal-fork">My Personal Fork</h2>
+<p>I have a personal fork of Cataclysm: Dark Days Ahead, based on version 0.E stable, before the inclusion of nested containers and mandatory Z-levels.
+I've made over a hundred individual changes to the game to tweak it to how I like it to be played; here are some of the highlights:</p>
+<ul>
+<li>Greatly improved support for bitmap fonts, particularly for anti-aliasing and blending.
+This allows players to bypass the game's in-built font rendering and replace it with their own choices, right down to the pixel.</li>
+<li>Allow household item density to be separately configured; reduce it for a more scavenging-focused game!</li>
+<li>Reduce massive abundance of ammo from turrets and freely-available fresh water from forests and swamps.</li>
+<li>Fix overly-tight limits on aiming speed based on firearm volume so that gun mods that improve aiming speed can actually do so.</li>
+<li>Add 'S' key to armor sorting screen to reposition armor by layer.</li>
+<li>Allow reviving corpses to be sorted at the top of the visible items sidebar list.</li>
+<li>Fix 'ghost' trails of dragged vehicles in map memory.</li>
+<li>Dozens of minor user interface and quality-of-life tweaks.</li>
+</ul>
+<p><a href="https://github.com/tung/Cataclysm-DDA">My personal fork of Cataclysm: Dark Days Ahead on Github</a>, and the <a href="https://github.com/tung/Cataclysm-DDA/commits/custom">commit log</a> with all of my changes.</p>
+<h2 id="more-information">More Information</h2>
+<ul>
+<li><a href="https://cataclysmdda.org/">Cataclysm: Dark Days Ahead website</a></li>
+<li><a href="https://github.com/CleverRaven/Cataclysm-DDA/">Cataclysm: Dark Days Ahead source code on GitHub</a></li>
+</ul>
+
+  </article>
+  <nav class="bottom-nav">
+    
+    <p><a href="&#x2F;projects&#x2F;">&LeftArrow; More Projects</a></p>
+  </nav>
+
+  <footer>
+    Made with <a href="https://www.getzola.org">Zola</a>.
+  </footer>
+</body>
+
+</html>

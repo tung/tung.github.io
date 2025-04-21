@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title>Tung&#x27;s Word Box - graphics</title>
+    <subtitle>Programming, game development and other technical tidbits</subtitle>
+    <link rel="self" type="application/atom+xml" href="https://tung.github.io/tags/graphics/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://tung.github.io"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2025-03-19T00:00:00+00:00</updated>
+    <id>https://tung.github.io/tags/graphics/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Multi-Threaded Rust Ray Tracing Demo</title>
+        <published>2025-03-19T00:00:00+00:00</published>
+        <updated>2025-03-19T00:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              tungtn
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://tung.github.io/posts/multi-threaded-rust-ray-tracing-demo/"/>
+        <id>https://tung.github.io/posts/multi-threaded-rust-ray-tracing-demo/</id>
+        
+        <summary type="html">
+&lt;figure&gt;
+  &lt;a href=&quot;&amp;#x2F;posts&amp;#x2F;multi-threaded-rust-ray-tracing-demo&amp;#x2F;ray-tracing.png&quot;&gt;&lt;img src=&quot;https:&amp;#x2F;&amp;#x2F;tung.github.io&amp;#x2F;processed_images&amp;#x2F;ray-tracing.25c002aa6a97723f.png&quot; alt=&quot;Ray-traced scene with spheres rendered with multi-threaded Rust&quot; title=&quot;Ray-traced scene with spheres rendered with multi-threaded Rust&quot;&gt;&lt;&#x2F;a&gt;
+&lt;&#x2F;figure&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;raytracing.github.io&#x2F;books&#x2F;RayTracingInOneWeekend.html&quot;&gt;&lt;em&gt;Ray Tracing in One Weekend&lt;&#x2F;em&gt;&lt;&#x2F;a&gt; is a free online book that takes you through the process of programming a ray tracer from scratch.
+It starts by writing support code to do math with 3-element vectors, building up a 3D scene with spheres and adding materials, and finishing by rendering a large scene of spheres of various sizes and materials.&lt;&#x2F;p&gt;
+&lt;p&gt;The book provides source code in C++, which I followed directly my first time through.
+Having done that, I decided to get a little bolder and repeat the experiment with Rust.
+This went well enough that I went even further and added multi-threading to speed it up;
+the picture above is the result of letting this multi-threaded renderer run for a while.&lt;&#x2F;p&gt;
+&lt;p&gt;Anyway, this ended up being interesting enough to do a write-up about, so here it is;
+read on!&lt;&#x2F;p&gt;
+</summary>
+        
+    </entry>
+</feed>

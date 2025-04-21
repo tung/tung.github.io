@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="description" content="Programming, game development and other technical tidbits">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Learning Zig&#x27;s Build System using raylib | Tung&#x27;s Word Box</title>
+  <link rel="icon" href="https://tung.github.io/favicon.png" type="image/png" sizes="any">
+  <link rel="stylesheet" href="https://tung.github.io/tufte.css">
+  <link rel="stylesheet" href="https://tung.github.io/site.css">
+  
+    <link rel="alternate" type="application/atom+xml" title="Tung&#x27;s Word Box" href="https://tung.github.io/atom.xml">
+  
+</head>
+
+<body>
+  <header>
+    <div class="home">
+      <a href="https://tung.github.io">Tung&#x27;s Word Box</a>
+    </div>
+    <nav>
+      <a href="https://tung.github.io/posts/">Posts</a>
+      <a href="https://tung.github.io/tags/">Tags</a>
+      <a href="https://tung.github.io/projects/">Projects</a>
+      <a href="https://github.com/tung">GitHub</a>
+      <a href="https://tungtn.itch.io">itch.io</a>
+    </nav>
+    <div style="clear: both"></div>
+  </header>
+
+  
+  <h1>Learning Zig&#x27;s Build System using raylib</h1>
+  <article>
+    
+    
+    <p class="meta">
+        Posted on 2024-11-06, 
+        Updated 2025-03-19; 
+        Tags:
+        <span class="tags">
+              <a href="https://tung.github.io/tags/gamedev/">gamedev</a>,
+              <a href="https://tung.github.io/tags/programming/">programming</a>,
+              <a href="https://tung.github.io/tags/zig/">zig</a>
+        </span>
+    </p>
+    <br>
+    <p><strong>Edit</strong>: Updated for Zig 0.14.0 and a version of raylib that works with it.</p>
+<p>I picked up some Zig recently and figured I'd take the chance to learn its build system using raylib.
+raylib already has pretty good community-maintained idiomatic Zig bindings, but we want to learn, so we're going to do it the "hard" way instead.</p>
+<p>raylib has a <code>build.zig</code>, which means that it can be used directly with Zig's package manager.
+Its C headers can also be translated into a Zig module that can be <code>@import</code>ed, thanks to Zig's built-in C translator.</p>
+<p>Note: We will <em>not</em> be using <code>@cImport</code>, since it seems like it'll be removed in future versions of Zig.</p>
+<span id="continue-reading"></span><h2 id="warning-about-versions"><a class="zola-anchor" href="#warning-about-versions" aria-label="Anchor link for: warning-about-versions">&num;</a>
+Warning about Versions</h2>
+<p>Zig, its build system and package manager, and raylib's Zig support are all currently under active development.
+Details are subject to change.</p>
+<p><strong>Zig version</strong>: This needs <em>Zig 0.14</em>; Zig 0.13 will not work.</p>
+<p><strong>raylib</strong>: Commit <code>75b6b825dfc93488bc411c00845164b5c0f8fae6.zip</code> (2024-12-29); raylib v5.5 is too old for this.</p>
+<p>NOTE: This version of Zig spits out a bunch of error messages when linking the final executable.
+The build should still succeed regardless; check the output directory.</p>
+<h2 id="package-structure"><a class="zola-anchor" href="#package-structure" aria-label="Anchor link for: package-structure">&num;</a>
+Package Structure</h2>
+<p>The layout of files when we're done is going to look like this:</p>
+<pre class="z-code"><code><span class="z-text z-plain">.
+</span><span class="z-text z-plain">├── build.zig
+</span><span class="z-text z-plain">├── build.zig.zon
+</span><span class="z-text z-plain">└── src
+</span><span class="z-text z-plain">    ├── c.h
+</span><span class="z-text z-plain">    └── main.zig
+</span></code></pre>
+<p><code>build.zig</code>: Package-specific build system logic; most of our focus and effort will go here.</p>
+<p><code>build.zig.zon</code>: Package manifest, including metadata and dependencies for Zig's package manager.</p>
+<p><code>src/c.h</code>: C header that will be translated into a Zig module that <code>main.zig</code> can <code>@import</code>.</p>
+<p><code>src/main.zig</code>: Zig code that uses raylib via the translated C header.</p>
+<h2 id="the-c-header"><a class="zola-anchor" href="#the-c-header" aria-label="Anchor link for: the-c-header">&num;</a>
+The C Header</h2>
+<p>Put the following line of code into <code>src/c.h</code>:</p>
+<pre data-lang="c" class="language-c z-code"><code class="language-c" data-lang="c"><span class="z-source z-c"><span class="z-meta z-preprocessor z-include z-c"><span class="z-keyword z-control z-import z-include z-c">#include</span> <span class="z-string z-quoted z-other z-lt-gt z-include z-c"><span class="z-punctuation z-definition z-string z-begin z-c">&lt;</span>raylib.h<span class="z-punctuation z-definition z-string z-end z-c">&gt;</span></span>
+</span></span></code></pre>
+<p>We'll arrange for this to be translated into Zig code that will let us use raylib without having to write any FFI bindings by hand.</p>
+<h2 id="zig-code-that-uses-raylib"><a class="zola-anchor" href="#zig-code-that-uses-raylib" aria-label="Anchor link for: zig-code-that-uses-raylib">&num;</a>
+Zig Code that uses raylib</h2>
+<p>Put this into <code>src/main.zig</code>:</p>
+<pre data-lang="zig" class="language-zig z-code"><code class="language-zig" data-lang="zig"><span class="z-source z-zig"><span class="z-storage z-modifier z-zig">const</span> c <span class="z-keyword z-operator z-assignment z-zig">=</span> <span class="z-keyword z-control z-import z-zig">@import</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span><span class="z-string z-quoted z-double z-zig">&quot;c&quot;</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span><span class="z-source z-zig">
+</span><span class="z-source z-zig"><span class="z-storage z-modifier z-zig">pub</span> <span class="z-storage z-type z-function z-zig">fn</span> <span class="z-entity z-name z-function">main</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span> <span class="z-storage z-type z-zig">void</span> <span class="z-punctuation z-section z-braces z-begin z-zig">{</span>
+</span><span class="z-source z-zig">    c.<span class="z-variable z-function z-zig">InitWindow</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span><span class="z-constant z-numeric z-integer z-zig">800</span><span class="z-punctuation z-separator z-zig">,</span> <span class="z-constant z-numeric z-integer z-zig">450</span><span class="z-punctuation z-separator z-zig">,</span> <span class="z-string z-quoted z-double z-zig">&quot;raylib example&quot;</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span><span class="z-source z-zig">    <span class="z-keyword z-control z-zig">defer</span> c.<span class="z-variable z-function z-zig">CloseWindow</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span><span class="z-source z-zig">
+</span><span class="z-source z-zig">    c.<span class="z-variable z-function z-zig">SetTargetFPS</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span><span class="z-constant z-numeric z-integer z-zig">60</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span><span class="z-source z-zig">
+</span><span class="z-source z-zig">    <span class="z-keyword z-control z-zig">while</span> <span class="z-punctuation z-section z-parens z-begin z-zig">(</span><span class="z-keyword z-operator z-logical z-zig">!</span>c.<span class="z-variable z-function z-zig">WindowShouldClose</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span> <span class="z-punctuation z-section z-braces z-begin z-zig">{</span>
+</span><span class="z-source z-zig">        c.<span class="z-variable z-function z-zig">BeginDrawing</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span><span class="z-source z-zig">        <span class="z-keyword z-control z-zig">defer</span> c.<span class="z-variable z-function z-zig">EndDrawing</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span><span class="z-source z-zig">
+</span><span class="z-source z-zig">        c.<span class="z-variable z-function z-zig">ClearBackground</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span>c.RAYWHITE<span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span><span class="z-source z-zig">        c.<span class="z-variable z-function z-zig">DrawText</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span><span class="z-string z-quoted z-double z-zig">&quot;This is a basic window.&quot;</span><span class="z-punctuation z-separator z-zig">,</span> <span class="z-constant z-numeric z-integer z-zig">100</span><span class="z-punctuation z-separator z-zig">,</span> <span class="z-constant z-numeric z-integer z-zig">200</span><span class="z-punctuation z-separator z-zig">,</span> <span class="z-constant z-numeric z-integer z-zig">20</span><span class="z-punctuation z-separator z-zig">,</span> c.LIGHTGRAY<span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span><span class="z-source z-zig">    <span class="z-punctuation z-section z-braces z-end z-zig">}</span>
+</span><span class="z-source z-zig"><span class="z-punctuation z-section z-braces z-end z-zig">}</span>
+</span></code></pre>
+<p>The C code in <code>src/c.h</code> will be turned into a module named "c" that we <code>@import</code> in this file.
+C functions and definitions from raylib can be used directly from Zig like this.</p>
+<h2 id="filling-in-build-zig-zon-for-zig-s-package-manager"><a class="zola-anchor" href="#filling-in-build-zig-zon-for-zig-s-package-manager" aria-label="Anchor link for: filling-in-build-zig-zon-for-zig-s-package-manager">&num;</a>
+Filling in <code>build.zig.zon</code> for Zig's Package Manager</h2>
+<p>Put this into <code>build.zig.zon</code>:</p>
+<pre data-lang="zig" class="language-zig z-code"><code class="language-zig" data-lang="zig"><span class="z-source z-zig">.<span class="z-punctuation z-section z-braces z-begin z-zig">{</span>
+</span><span class="z-source z-zig">    .name <span class="z-keyword z-operator z-assignment z-zig">=</span><span class="z-constant z-language z-enum"> .example</span><span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">    .version <span class="z-keyword z-operator z-assignment z-zig">=</span> <span class="z-string z-quoted z-double z-zig">&quot;0.1.0&quot;</span><span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">    .minimum_zig_version <span class="z-keyword z-operator z-assignment z-zig">=</span> <span class="z-string z-quoted z-double z-zig">&quot;0.14.0&quot;</span><span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">    .dependencies <span class="z-keyword z-operator z-assignment z-zig">=</span> .<span class="z-punctuation z-section z-braces z-begin z-zig">{</span><span class="z-punctuation z-section z-braces z-end z-zig">}</span><span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">    .paths <span class="z-keyword z-operator z-assignment z-zig">=</span> .<span class="z-punctuation z-section z-braces z-begin z-zig">{</span>
+</span><span class="z-source z-zig">        <span class="z-string z-quoted z-double z-zig">&quot;build.zig&quot;</span><span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">        <span class="z-string z-quoted z-double z-zig">&quot;build.zig.zon&quot;</span><span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">        <span class="z-string z-quoted z-double z-zig">&quot;src&quot;</span><span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">    <span class="z-punctuation z-section z-braces z-end z-zig">}</span><span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">    .fingerprint <span class="z-keyword z-operator z-assignment z-zig">=</span> <span class="z-constant z-numeric z-integer z-hexadecimal z-zig">0x6eec9b9fa0e0208d</span><span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig"><span class="z-punctuation z-section z-braces z-end z-zig">}</span>
+</span></code></pre>
+<p>This file is in <em>Zig Object Notation</em>, which is just a cut-down version of Zig's struct syntax.
+Here's the field-by-field break down:</p>
+<p><code>.name</code>: Package name that's used if this is a library; our's isn't, so we just put something sensible here.</p>
+<p><code>.version</code>: Package version; only really matters for library packages, which our's isn't.</p>
+<p><code>.minimum_zig_version</code>: Optional advisory field; we fill it with "0.14.0" here since our <code>build.zig</code> won't work with Zig 0.13.</p>
+<p><code>.dependencies</code>: List of Zig packages that Zig's package manager will get before building our package.</p>
+<p><code>.paths</code>: Files and directories of this package that Zig's package manager will keep after getting the source.</p>
+<p><code>.fingerprint</code>: Hexadecimal number that identifies this package; if you leave it out, Zig will suggest one for you.</p>
+<p>Our dependency list is empty right now.
+Run the following commands to fetch the raylib Zig package:</p>
+<pre class="z-code"><code><span class="z-text z-plain">touch build.zig
+</span><span class="z-text z-plain">zig fetch --save=raylib https://github.com/raysan5/raylib/archive/75b6b825dfc93488bc411c00845164b5c0f8fae6.zip
+</span></code></pre>
+<p><code>zig fetch</code> will fail without a <code>build.zig</code> file present, so we make an empty one before running the command.</p>
+<p>If you look at <code>build.zig.zon</code> again, it should now look like this:</p>
+<pre data-lang="zig" class="language-zig z-code"><code class="language-zig" data-lang="zig"><span class="z-source z-zig">.<span class="z-punctuation z-section z-braces z-begin z-zig">{</span>
+</span><span class="z-source z-zig">    .name <span class="z-keyword z-operator z-assignment z-zig">=</span><span class="z-constant z-language z-enum"> .example</span><span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">    .version <span class="z-keyword z-operator z-assignment z-zig">=</span> <span class="z-string z-quoted z-double z-zig">&quot;0.1.0&quot;</span><span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">    .minimum_zig_version <span class="z-keyword z-operator z-assignment z-zig">=</span> <span class="z-string z-quoted z-double z-zig">&quot;0.14.0&quot;</span><span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">    .dependencies <span class="z-keyword z-operator z-assignment z-zig">=</span> .<span class="z-punctuation z-section z-braces z-begin z-zig">{</span>
+</span><span class="z-source z-zig">        .raylib <span class="z-keyword z-operator z-assignment z-zig">=</span> .<span class="z-punctuation z-section z-braces z-begin z-zig">{</span>
+</span><span class="z-source z-zig">            .url <span class="z-keyword z-operator z-assignment z-zig">=</span> <span class="z-string z-quoted z-double z-zig">&quot;https://github.com/raysan5/raylib/archive/75b6b825dfc93488bc411c00845164b5c0f8fae6.zip&quot;</span><span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">            .hash <span class="z-keyword z-operator z-assignment z-zig">=</span> <span class="z-string z-quoted z-double z-zig">&quot;raylib-5.5.0-AAAAAHV3zADPmK0F1nLRNCUQrnezXuXiIs3ixRNKFHdN&quot;</span><span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">        <span class="z-punctuation z-section z-braces z-end z-zig">}</span><span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">    <span class="z-punctuation z-section z-braces z-end z-zig">}</span><span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">    .paths <span class="z-keyword z-operator z-assignment z-zig">=</span> .<span class="z-punctuation z-section z-braces z-begin z-zig">{</span>
+</span><span class="z-source z-zig">        <span class="z-string z-quoted z-double z-zig">&quot;build.zig&quot;</span><span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">        <span class="z-string z-quoted z-double z-zig">&quot;build.zig.zon&quot;</span><span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">        <span class="z-string z-quoted z-double z-zig">&quot;src&quot;</span><span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">    <span class="z-punctuation z-section z-braces z-end z-zig">}</span><span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">    .fingerprint <span class="z-keyword z-operator z-assignment z-zig">=</span> <span class="z-constant z-numeric z-integer z-hexadecimal z-zig">0x6eec9b9fa0e0208d</span><span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig"><span class="z-punctuation z-section z-braces z-end z-zig">}</span>
+</span></code></pre>
+<p><code>raylib</code> is the dependency name that will be used later on in our upcoming <code>build.zig</code>.
+A dependency can be a <code>url</code> and <code>hash</code> pair like this, or it can be a <code>path</code> instead.
+If we wanted to use raylib for another package, we could copy-paste these dependency lines into some other <code>build.zig.zon</code>.
+However, this will do for now.</p>
+<p>With <code>build.zig.zon</code> filled in like this, raylib will be available as a dependency when building this package.
+If this package is being built on another computer, raylib will be automatically fetched first via the URL.</p>
+<h2 id="zig-build-system-concepts"><a class="zola-anchor" href="#zig-build-system-concepts" aria-label="Anchor link for: zig-build-system-concepts">&num;</a>
+Zig Build System Concepts</h2>
+<p>Before moving onto filling in <code>build.zig</code>, we'll want to know a few foundational concepts.
+Zig's build system is still in flux, so there isn't a lot of good high-level documentation.</p>
+<p>The purpose of <code>build.zig</code> is to create a <strong>build graph</strong> that describes the actions and order of build-related tasks, such as compiling and linking our program.</p>
+<p>The build graph is made up of <strong>steps</strong> that represent build actions.
+Steps depend on other steps, forming a directed acyclic graph.</p>
+<p>Steps often produce output files; Zig calls these <strong>artifacts</strong>.
+Examples of artifacts are compiled and linked programs, libraries, and generated source and data files.</p>
+<p><strong>Top-level steps</strong> are special steps that serve as entry points into a build graph.
+Top-level steps perform no actions; they only have other steps as depedencies.</p>
+<p>The <strong><code>install</code> top-level step</strong> exists in the build graph by default.
+As the default top-level step, running <code>zig build</code> is equivalent to running <code>zig build install</code>.
+You can add custom top-level steps to do whatever you want, such as <code>run</code> or <code>test</code>.</p>
+<p>Unlike other tools like <code>make</code>, the inter-step dependencies of the build graph usually aren't listed directly.
+Instead, you'll typically use helper functions that wire up most of the steps of the build graph internally.
+Those helper functions often return values that can be fed into other helper functions to associate steps with one another.</p>
+<h2 id="describing-the-package-build-graph-in-build-zig"><a class="zola-anchor" href="#describing-the-package-build-graph-in-build-zig" aria-label="Anchor link for: describing-the-package-build-graph-in-build-zig">&num;</a>
+Describing the Package Build Graph in <code>build.zig</code></h2>
+<p>Our upcoming <code>build.zig</code> has to create a build graph that does the following:</p>
+<ol>
+<li>Read in and parse build-time options that customize the build.</li>
+<li>Pull in the raylib dependency, made available thanks to our <code>build.zig.zon</code>.</li>
+<li>Translate the C code in <code>src/c.h</code> into Zig bindings.</li>
+<li>Create a Zig module from the translated <code>src/c.h</code> that links to raylib when imported.</li>
+<li>Make an executable from a module with <code>src/main.zig</code> that itself imports the C-to-Zig module.</li>
+<li>Install the executable as part of the default <code>install</code> top-level step.</li>
+<li>Create a step to run the executable, and a custom <code>run</code> top-level step to trigger it.</li>
+</ol>
+<p>Put the following into the empty <code>build.zig</code> we created earlier:</p>
+<pre data-lang="zig" class="language-zig z-code"><code class="language-zig" data-lang="zig"><span class="z-source z-zig"><span class="z-storage z-modifier z-zig">const</span> std <span class="z-keyword z-operator z-assignment z-zig">=</span> <span class="z-keyword z-control z-import z-zig">@import</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span><span class="z-string z-quoted z-double z-zig">&quot;std&quot;</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span><span class="z-source z-zig">
+</span><span class="z-source z-zig"><span class="z-storage z-modifier z-zig">pub</span> <span class="z-storage z-type z-function z-zig">fn</span> <span class="z-entity z-name z-function">build</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span><span class="z-variable z-parameter z-zig">b</span><span class="z-punctuation z-separator z-zig">:</span> <span class="z-keyword z-operator z-arithmetic z-zig">*</span><span class="z-storage z-type z-zig">std.Build</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span> <span class="z-storage z-type z-zig">void</span> <span class="z-punctuation z-section z-braces z-begin z-zig">{</span>
+</span><span class="z-source z-zig"><span class="z-punctuation z-section z-braces z-end z-zig">}</span>
+</span></code></pre>
+<p>Add all of the upcoming code samples inside the curly braces.</p>
+<h3 id="parse-build-time-options"><a class="zola-anchor" href="#parse-build-time-options" aria-label="Anchor link for: parse-build-time-options">&num;</a>
+Parse Build-Time Options</h3>
+<pre data-lang="zig" class="language-zig z-code"><code class="language-zig" data-lang="zig"><span class="z-source z-zig">    <span class="z-storage z-modifier z-zig">const</span> target <span class="z-keyword z-operator z-assignment z-zig">=</span> b.<span class="z-variable z-function z-zig">standardTargetOptions</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span>.<span class="z-punctuation z-section z-braces z-begin z-zig">{</span><span class="z-punctuation z-section z-braces z-end z-zig">}</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span></code></pre>
+<p>This adds Zig's standard target options: <code>-Dtarget=</code>, <code>-Dcpu=</code> and <code>-Ddynamic-linker=</code>.
+Zig is a batteries-included cross compiler and linker, with no special setup needed.</p>
+<pre data-lang="zig" class="language-zig z-code"><code class="language-zig" data-lang="zig"><span class="z-source z-zig">    <span class="z-storage z-modifier z-zig">const</span> optimize <span class="z-keyword z-operator z-assignment z-zig">=</span> b.<span class="z-variable z-function z-zig">standardOptimizeOption</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span>.<span class="z-punctuation z-section z-braces z-begin z-zig">{</span>
+</span><span class="z-source z-zig">        .preferred_optimize_mode <span class="z-keyword z-operator z-assignment z-zig">=</span><span class="z-constant z-language z-enum"> .ReleaseSmall</span><span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">    <span class="z-punctuation z-section z-braces z-end z-zig">}</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span></code></pre>
+<p>This adds Zig's standard optimize option, <code>-Doptimize=</code> that can currently be set to <code>Debug</code>, <code>ReleaseSafe</code>, <code>ReleaseFast</code> or <code>ReleaseSmall</code>.</p>
+<p>Zig's build system also supports a special <code>--release=</code> flag that a user can employ to override any package-specific optimization choices.
+It accepts <code>safe</code>, <code>fast</code> or <code>small</code> as values.
+If no value is given, it'll use the <code>preferred_optimize_mode</code> value here by default.</p>
+<p>If no optimization option is given at all to <code>zig build</code>, then <code>Debug</code> is the default optimization.</p>
+<pre data-lang="zig" class="language-zig z-code"><code class="language-zig" data-lang="zig"><span class="z-source z-zig">    <span class="z-storage z-modifier z-zig">const</span> raylib_optimize <span class="z-keyword z-operator z-assignment z-zig">=</span> b.<span class="z-variable z-function z-zig">option</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span>
+</span><span class="z-source z-zig">        std.builtin.OptimizeMode<span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">        <span class="z-string z-quoted z-double z-zig">&quot;raylib-optimize&quot;</span><span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">        <span class="z-string z-quoted z-double z-zig">&quot;Override optimization of raylib&quot;</span><span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">    <span class="z-punctuation z-section z-parens z-end z-zig">)</span> <span class="z-keyword z-control z-conditional z-zig">orelse</span> optimize<span class="z-punctuation z-terminator z-zig">;</span>
+</span></code></pre>
+<p>This parses a custom <code>--Doptimize-raylib=</code> option to let the user override the optimization of raylib.
+It accepts the same <code>Debug</code>, <code>ReleaseSafe</code>, <code>ReleaseFast</code> and <code>ReleaseSmall</code> choices as the standard optimize option.</p>
+<p>This command line flag is optional, and falls back on the package's optimization due to the <code>orelse</code> clause at the end.</p>
+<h3 id="the-raylib-depdency"><a class="zola-anchor" href="#the-raylib-depdency" aria-label="Anchor link for: the-raylib-depdency">&num;</a>
+The raylib Depdency</h3>
+<pre data-lang="zig" class="language-zig z-code"><code class="language-zig" data-lang="zig"><span class="z-source z-zig">    <span class="z-storage z-modifier z-zig">const</span> raylib_dep <span class="z-keyword z-operator z-assignment z-zig">=</span> b.<span class="z-variable z-function z-zig">dependency</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span><span class="z-string z-quoted z-double z-zig">&quot;raylib&quot;</span><span class="z-punctuation z-separator z-zig">,</span> .<span class="z-punctuation z-section z-braces z-begin z-zig">{</span>
+</span><span class="z-source z-zig">        .target <span class="z-keyword z-operator z-assignment z-zig">=</span> target<span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">        .optimize <span class="z-keyword z-operator z-assignment z-zig">=</span> raylib_optimize<span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">    <span class="z-punctuation z-section z-braces z-end z-zig">}</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span></code></pre>
+<p>This pulls in the <code>raylib</code> dependency.
+The <code>"raylib"</code> value here is the name as it appears in the <code>dependencies</code> list in <code>build.zig.zon</code>.</p>
+<pre data-lang="zig" class="language-zig z-code"><code class="language-zig" data-lang="zig"><span class="z-source z-zig">    <span class="z-storage z-modifier z-zig">const</span> raylib_art <span class="z-keyword z-operator z-assignment z-zig">=</span> raylib_dep.<span class="z-variable z-function z-zig">artifact</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span><span class="z-string z-quoted z-double z-zig">&quot;raylib&quot;</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span></code></pre>
+<p>The Zig build system will build raylib from source, creating an artifact that we grab here.
+We'll use it later to tell other steps where the raylib library and header files are located.
+Those later uses will include the raylib dependency into the build graph, causing it to be built from source when needed.</p>
+<h3 id="translating-src-c-h-from-c-to-zig"><a class="zola-anchor" href="#translating-src-c-h-from-c-to-zig" aria-label="Anchor link for: translating-src-c-h-from-c-to-zig">&num;</a>
+Translating <code>src/c.h</code> from C to Zig</h3>
+<pre data-lang="zig" class="language-zig z-code"><code class="language-zig" data-lang="zig"><span class="z-source z-zig">    <span class="z-storage z-modifier z-zig">const</span> translate_c <span class="z-keyword z-operator z-assignment z-zig">=</span> b.<span class="z-variable z-function z-zig">addTranslateC</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span>.<span class="z-punctuation z-section z-braces z-begin z-zig">{</span>
+</span><span class="z-source z-zig">        .root_source_file <span class="z-keyword z-operator z-assignment z-zig">=</span> b.<span class="z-variable z-function z-zig">path</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span><span class="z-string z-quoted z-double z-zig">&quot;src/c.h&quot;</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">        .target <span class="z-keyword z-operator z-assignment z-zig">=</span> target<span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">        .optimize <span class="z-keyword z-operator z-assignment z-zig">=</span> optimize<span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">        .link_libc <span class="z-keyword z-operator z-assignment z-zig">=</span> <span class="z-constant z-language z-zig">true</span><span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">    <span class="z-punctuation z-section z-braces z-end z-zig">}</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span><span class="z-source z-zig">    translate_c.<span class="z-variable z-function z-zig">addIncludePath</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span>raylib_art.<span class="z-variable z-function z-zig">getEmittedIncludeTree</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span></code></pre>
+<p>This is our first real step.
+<code>b.addTranslateC</code> creates a <code>std.Build.Step.TranslateC</code> which I'll call "a <code>TranslateC</code> step" for short.</p>
+<p>The <code>root_source_file</code> points to the C source code to translate to Zig.
+Using <code>b.path</code> specifies a path that is always relative to the package root directory.</p>
+<p>The <code>target</code> and <code>optimize</code> fields are set according to the build-time options parsed earlier.</p>
+<p>raylib uses the C standard library, so we set <code>link_libc</code> here to ensure that it's linked into the final executable.</p>
+<p>Recall that <code>src/c.h</code> contains <code>#include &lt;raylib.h&gt;</code>.
+For the <code>TranslateC</code> step to find <code>raylib.h</code>, the path where this dependency header file was installed must be added to the include path.
+<code>raylib_art.getEmittedIncludeTree()</code> retrieves exactly that path.</p>
+<h3 id="creating-a-zig-module-from-the-translated-c-code"><a class="zola-anchor" href="#creating-a-zig-module-from-the-translated-c-code" aria-label="Anchor link for: creating-a-zig-module-from-the-translated-c-code">&num;</a>
+Creating a Zig Module from the Translated C Code</h3>
+<pre data-lang="zig" class="language-zig z-code"><code class="language-zig" data-lang="zig"><span class="z-source z-zig">    <span class="z-storage z-modifier z-zig">const</span> c_module <span class="z-keyword z-operator z-assignment z-zig">=</span> translate_c.<span class="z-variable z-function z-zig">createModule</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span><span class="z-source z-zig">    c_module.<span class="z-variable z-function z-zig">linkLibrary</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span>raylib_art<span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span></code></pre>
+<p>This arranges for a module to be created from the translated C file.
+Doing this allows it to be imported by Zig code.</p>
+<p>We use <code>linkLibrary</code> to tell the build system to link to the raylib library when linking the final executable.</p>
+<h3 id="building-the-executable"><a class="zola-anchor" href="#building-the-executable" aria-label="Anchor link for: building-the-executable">&num;</a>
+Building the Executable</h3>
+<pre data-lang="zig" class="language-zig z-code"><code class="language-zig" data-lang="zig"><span class="z-source z-zig">    <span class="z-storage z-modifier z-zig">const</span> mod <span class="z-keyword z-operator z-assignment z-zig">=</span> b.<span class="z-variable z-function z-zig">createModule</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span>.<span class="z-punctuation z-section z-braces z-begin z-zig">{</span>
+</span><span class="z-source z-zig">        .root_source_file <span class="z-keyword z-operator z-assignment z-zig">=</span> b.<span class="z-variable z-function z-zig">path</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span><span class="z-string z-quoted z-double z-zig">&quot;src/main.zig&quot;</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">        .target <span class="z-keyword z-operator z-assignment z-zig">=</span> target<span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">        .optimize <span class="z-keyword z-operator z-assignment z-zig">=</span> optimize<span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">    <span class="z-punctuation z-section z-braces z-end z-zig">}</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span><span class="z-source z-zig">    mod.<span class="z-variable z-function z-zig">addImport</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span><span class="z-string z-quoted z-double z-zig">&quot;c&quot;</span><span class="z-punctuation z-separator z-zig">,</span> c_module<span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span><span class="z-source z-zig">
+</span><span class="z-source z-zig">    <span class="z-storage z-modifier z-zig">const</span> exe <span class="z-keyword z-operator z-assignment z-zig">=</span> b.<span class="z-variable z-function z-zig">addExecutable</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span>.<span class="z-punctuation z-section z-braces z-begin z-zig">{</span>
+</span><span class="z-source z-zig">        .name <span class="z-keyword z-operator z-assignment z-zig">=</span> <span class="z-string z-quoted z-double z-zig">&quot;example&quot;</span><span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">        .root_module <span class="z-keyword z-operator z-assignment z-zig">=</span> mod<span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">    <span class="z-punctuation z-section z-braces z-end z-zig">}</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span></code></pre>
+<p><code>b.createModule</code> makes a <em>module</em>, which is a group of files that Zig knows how to compile, with extra info on how they should be compiled.
+<code>root_source_file</code> points at our package-relative <code>src/main.zig</code> file path.
+<code>target</code> and <code>optimize</code> are specified as before.</p>
+<p><code>mod.addImport("c", c_module)</code> allows <code>@import("c")</code> to work inside <code>src/main.zig</code>.</p>
+<p><code>b.addExecutable</code> creates a <code>Compile</code> step that links an executable from the module we just created.</p>
+<h3 id="installing-the-executable"><a class="zola-anchor" href="#installing-the-executable" aria-label="Anchor link for: installing-the-executable">&num;</a>
+Installing the Executable</h3>
+<pre data-lang="zig" class="language-zig z-code"><code class="language-zig" data-lang="zig"><span class="z-source z-zig">    b.<span class="z-variable z-function z-zig">installArtifact</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span>exe<span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span></code></pre>
+<p>This creates an <code>InstallArtifact</code> step internally that copies the final executable to the <code>zig-out/bin</code> directory.
+This internal <code>InstallArtifact</code> step is added as a depedency of the default <code>install</code> top-level step, so running <code>zig build</code> will perform this action automatically.</p>
+<p>Without this step, nothing will be built when <code>zig build</code> is run!</p>
+<h3 id="adding-a-step-to-run-the-executable"><a class="zola-anchor" href="#adding-a-step-to-run-the-executable" aria-label="Anchor link for: adding-a-step-to-run-the-executable">&num;</a>
+Adding a Step to Run the Executable</h3>
+<pre data-lang="zig" class="language-zig z-code"><code class="language-zig" data-lang="zig"><span class="z-source z-zig">    <span class="z-storage z-modifier z-zig">const</span> run_exe <span class="z-keyword z-operator z-assignment z-zig">=</span> b.<span class="z-variable z-function z-zig">addRunArtifact</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span>exe<span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span><span class="z-source z-zig">    run_exe.step.<span class="z-variable z-function z-zig">dependOn</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span>b.<span class="z-variable z-function z-zig">getInstallStep</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span><span class="z-source z-zig">    <span class="z-keyword z-control z-conditional z-zig">if</span> <span class="z-punctuation z-section z-parens z-begin z-zig">(</span>b.args<span class="z-punctuation z-section z-parens z-end z-zig">)</span> <span class="z-keyword z-operator z-bitwise z-zig">|</span>args<span class="z-keyword z-operator z-bitwise z-zig">|</span> run_exe.<span class="z-variable z-function z-zig">addArgs</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span>args<span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span></code></pre>
+<p><code>b.addRunArtifact</code> creates a <code>RunArtifact</code> step that runs the executable as its action.</p>
+<p><code>run_exe.step.dependOn(b.getInstallStep())</code> is an example of making a step depend on another manually.
+Usually this is done behind the scenes by helper functions, but this one is explicit.
+This makes the <code>RunArtifact</code> step depend on the default <code>install</code> top-level step, so everything is installed before anything runs.
+Technically this could be left out here, but this is handy if the executable expects other files to be installed before running.</p>
+<p>The last line here allows forwarding command line arguments to the executable, e.g. <code>zig build run -- foo bar baz</code> will send <code>foo</code>, <code>bar</code> and <code>baz</code> to the executable as arguments.
+This is also optional and could be left out here.</p>
+<h3 id="a-custom-run-top-level-step"><a class="zola-anchor" href="#a-custom-run-top-level-step" aria-label="Anchor link for: a-custom-run-top-level-step">&num;</a>
+A Custom <code>run</code> Top-Level Step</h3>
+<pre data-lang="zig" class="language-zig z-code"><code class="language-zig" data-lang="zig"><span class="z-source z-zig">    <span class="z-storage z-modifier z-zig">const</span> run_tls <span class="z-keyword z-operator z-assignment z-zig">=</span> b.<span class="z-variable z-function z-zig">step</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span><span class="z-string z-quoted z-double z-zig">&quot;run&quot;</span><span class="z-punctuation z-separator z-zig">,</span> <span class="z-string z-quoted z-double z-zig">&quot;Run the app&quot;</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span><span class="z-source z-zig">    run_tls.<span class="z-variable z-function z-zig">dependOn</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span><span class="z-keyword z-operator z-bitwise z-zig">&amp;</span>run_exe.step<span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span></code></pre>
+<p>A <code>RunArtifact</code> step can't be invoked directly, since it could just be used internally, e.g. to generate files for the build.</p>
+<p><code>b.step</code> creates a top-level step that the user can pass to <code>zig build</code>.
+<code>b.step("run", "...")</code> here enables <code>zig build run</code> to be recognized by the build system.
+Despite the name, <code>b.step</code> specifically creates a <em>top-level step</em>, and not just any old step; the function name here is a bit confusing.</p>
+<p><code>run_tls.dependOn(&amp;run_exe.step)</code> links this top-level step to the <code>RunArtifact</code> step that runs the executable from earlier.</p>
+<p>That's it, we're done!</p>
+<h3 id="the-complete-build-zig"><a class="zola-anchor" href="#the-complete-build-zig" aria-label="Anchor link for: the-complete-build-zig">&num;</a>
+The Complete <code>build.zig</code></h3>
+<p>Here's the whole <code>build.zig</code> file in its entirety:</p>
+<pre data-lang="zig" class="language-zig z-code"><code class="language-zig" data-lang="zig"><span class="z-source z-zig"><span class="z-storage z-modifier z-zig">const</span> std <span class="z-keyword z-operator z-assignment z-zig">=</span> <span class="z-keyword z-control z-import z-zig">@import</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span><span class="z-string z-quoted z-double z-zig">&quot;std&quot;</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span><span class="z-source z-zig">
+</span><span class="z-source z-zig"><span class="z-storage z-modifier z-zig">pub</span> <span class="z-storage z-type z-function z-zig">fn</span> <span class="z-entity z-name z-function">build</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span><span class="z-variable z-parameter z-zig">b</span><span class="z-punctuation z-separator z-zig">:</span> <span class="z-keyword z-operator z-arithmetic z-zig">*</span><span class="z-storage z-type z-zig">std.Build</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span> <span class="z-storage z-type z-zig">void</span> <span class="z-punctuation z-section z-braces z-begin z-zig">{</span>
+</span><span class="z-source z-zig">    <span class="z-storage z-modifier z-zig">const</span> target <span class="z-keyword z-operator z-assignment z-zig">=</span> b.<span class="z-variable z-function z-zig">standardTargetOptions</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span>.<span class="z-punctuation z-section z-braces z-begin z-zig">{</span><span class="z-punctuation z-section z-braces z-end z-zig">}</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span><span class="z-source z-zig">    <span class="z-storage z-modifier z-zig">const</span> optimize <span class="z-keyword z-operator z-assignment z-zig">=</span> b.<span class="z-variable z-function z-zig">standardOptimizeOption</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span>.<span class="z-punctuation z-section z-braces z-begin z-zig">{</span>
+</span><span class="z-source z-zig">        .preferred_optimize_mode <span class="z-keyword z-operator z-assignment z-zig">=</span><span class="z-constant z-language z-enum"> .ReleaseSmall</span><span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">    <span class="z-punctuation z-section z-braces z-end z-zig">}</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span><span class="z-source z-zig">    <span class="z-storage z-modifier z-zig">const</span> raylib_optimize <span class="z-keyword z-operator z-assignment z-zig">=</span> b.<span class="z-variable z-function z-zig">option</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span>
+</span><span class="z-source z-zig">        std.builtin.OptimizeMode<span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">        <span class="z-string z-quoted z-double z-zig">&quot;raylib-optimize&quot;</span><span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">        <span class="z-string z-quoted z-double z-zig">&quot;Override optimization of raylib&quot;</span><span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">    <span class="z-punctuation z-section z-parens z-end z-zig">)</span> <span class="z-keyword z-control z-conditional z-zig">orelse</span> optimize<span class="z-punctuation z-terminator z-zig">;</span>
+</span><span class="z-source z-zig">
+</span><span class="z-source z-zig">    <span class="z-storage z-modifier z-zig">const</span> raylib_dep <span class="z-keyword z-operator z-assignment z-zig">=</span> b.<span class="z-variable z-function z-zig">dependency</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span><span class="z-string z-quoted z-double z-zig">&quot;raylib&quot;</span><span class="z-punctuation z-separator z-zig">,</span> .<span class="z-punctuation z-section z-braces z-begin z-zig">{</span>
+</span><span class="z-source z-zig">        .target <span class="z-keyword z-operator z-assignment z-zig">=</span> target<span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">        .optimize <span class="z-keyword z-operator z-assignment z-zig">=</span> raylib_optimize<span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">    <span class="z-punctuation z-section z-braces z-end z-zig">}</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span><span class="z-source z-zig">
+</span><span class="z-source z-zig">    <span class="z-storage z-modifier z-zig">const</span> raylib_art <span class="z-keyword z-operator z-assignment z-zig">=</span> raylib_dep.<span class="z-variable z-function z-zig">artifact</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span><span class="z-string z-quoted z-double z-zig">&quot;raylib&quot;</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span><span class="z-source z-zig">
+</span><span class="z-source z-zig">    <span class="z-storage z-modifier z-zig">const</span> translate_c <span class="z-keyword z-operator z-assignment z-zig">=</span> b.<span class="z-variable z-function z-zig">addTranslateC</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span>.<span class="z-punctuation z-section z-braces z-begin z-zig">{</span>
+</span><span class="z-source z-zig">        .root_source_file <span class="z-keyword z-operator z-assignment z-zig">=</span> b.<span class="z-variable z-function z-zig">path</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span><span class="z-string z-quoted z-double z-zig">&quot;src/c.h&quot;</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">        .target <span class="z-keyword z-operator z-assignment z-zig">=</span> target<span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">        .optimize <span class="z-keyword z-operator z-assignment z-zig">=</span> optimize<span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">        .link_libc <span class="z-keyword z-operator z-assignment z-zig">=</span> <span class="z-constant z-language z-zig">true</span><span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">    <span class="z-punctuation z-section z-braces z-end z-zig">}</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span><span class="z-source z-zig">    translate_c.<span class="z-variable z-function z-zig">addIncludePath</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span>raylib_art.<span class="z-variable z-function z-zig">getEmittedIncludeTree</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span><span class="z-source z-zig">
+</span><span class="z-source z-zig">    <span class="z-storage z-modifier z-zig">const</span> c_module <span class="z-keyword z-operator z-assignment z-zig">=</span> translate_c.<span class="z-variable z-function z-zig">createModule</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span><span class="z-source z-zig">    c_module.<span class="z-variable z-function z-zig">linkLibrary</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span>raylib_art<span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span><span class="z-source z-zig">
+</span><span class="z-source z-zig">    <span class="z-storage z-modifier z-zig">const</span> mod <span class="z-keyword z-operator z-assignment z-zig">=</span> b.<span class="z-variable z-function z-zig">createModule</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span>.<span class="z-punctuation z-section z-braces z-begin z-zig">{</span>
+</span><span class="z-source z-zig">        .root_source_file <span class="z-keyword z-operator z-assignment z-zig">=</span> b.<span class="z-variable z-function z-zig">path</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span><span class="z-string z-quoted z-double z-zig">&quot;src/main.zig&quot;</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">        .target <span class="z-keyword z-operator z-assignment z-zig">=</span> target<span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">        .optimize <span class="z-keyword z-operator z-assignment z-zig">=</span> optimize<span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">    <span class="z-punctuation z-section z-braces z-end z-zig">}</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span><span class="z-source z-zig">    mod.<span class="z-variable z-function z-zig">addImport</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span><span class="z-string z-quoted z-double z-zig">&quot;c&quot;</span><span class="z-punctuation z-separator z-zig">,</span> c_module<span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span><span class="z-source z-zig">
+</span><span class="z-source z-zig">    <span class="z-storage z-modifier z-zig">const</span> exe <span class="z-keyword z-operator z-assignment z-zig">=</span> b.<span class="z-variable z-function z-zig">addExecutable</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span>.<span class="z-punctuation z-section z-braces z-begin z-zig">{</span>
+</span><span class="z-source z-zig">        .name <span class="z-keyword z-operator z-assignment z-zig">=</span> <span class="z-string z-quoted z-double z-zig">&quot;example&quot;</span><span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">        .root_module <span class="z-keyword z-operator z-assignment z-zig">=</span> mod<span class="z-punctuation z-separator z-zig">,</span>
+</span><span class="z-source z-zig">    <span class="z-punctuation z-section z-braces z-end z-zig">}</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span><span class="z-source z-zig">
+</span><span class="z-source z-zig">    b.<span class="z-variable z-function z-zig">installArtifact</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span>exe<span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span><span class="z-source z-zig">
+</span><span class="z-source z-zig">    <span class="z-storage z-modifier z-zig">const</span> run_exe <span class="z-keyword z-operator z-assignment z-zig">=</span> b.<span class="z-variable z-function z-zig">addRunArtifact</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span>exe<span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span><span class="z-source z-zig">    run_exe.step.<span class="z-variable z-function z-zig">dependOn</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span>b.<span class="z-variable z-function z-zig">getInstallStep</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span><span class="z-source z-zig">    <span class="z-keyword z-control z-conditional z-zig">if</span> <span class="z-punctuation z-section z-parens z-begin z-zig">(</span>b.args<span class="z-punctuation z-section z-parens z-end z-zig">)</span> <span class="z-keyword z-operator z-bitwise z-zig">|</span>args<span class="z-keyword z-operator z-bitwise z-zig">|</span> run_exe.<span class="z-variable z-function z-zig">addArgs</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span>args<span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span><span class="z-source z-zig">
+</span><span class="z-source z-zig">    <span class="z-storage z-modifier z-zig">const</span> run_tls <span class="z-keyword z-operator z-assignment z-zig">=</span> b.<span class="z-variable z-function z-zig">step</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span><span class="z-string z-quoted z-double z-zig">&quot;run&quot;</span><span class="z-punctuation z-separator z-zig">,</span> <span class="z-string z-quoted z-double z-zig">&quot;Run the app&quot;</span><span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span><span class="z-source z-zig">    run_tls.<span class="z-variable z-function z-zig">dependOn</span><span class="z-punctuation z-section z-parens z-begin z-zig">(</span><span class="z-keyword z-operator z-bitwise z-zig">&amp;</span>run_exe.step<span class="z-punctuation z-section z-parens z-end z-zig">)</span><span class="z-punctuation z-terminator z-zig">;</span>
+</span><span class="z-source z-zig"><span class="z-punctuation z-section z-braces z-end z-zig">}</span>
+</span></code></pre>
+<p>The Zig build system can be invoked in the following ways:</p>
+<ul>
+<li><code>zig build</code> for a Debug build; this ends up in the <code>zig-out/bin</code> directory.</li>
+<li><code>zig build --release</code> for the default ReleaseSmall build.</li>
+<li><code>zig build run</code> to build and run the Debug build.</li>
+<li><code>zig build run --release</code> to build and run the ReleaseSmall build.</li>
+</ul>
+<h2 id="wrapping-up"><a class="zola-anchor" href="#wrapping-up" aria-label="Anchor link for: wrapping-up">&num;</a>
+Wrapping Up</h2>
+<p>Summing everything up, we:</p>
+<ol>
+<li>Created a module from C code in order to use raylib in a Zig program.</li>
+<li>Made a <code>build.zig.zon</code> manifest to fetch raylib as a dependency.</li>
+<li>Wrote a <code>build.zig</code> to build raylib, translate the C code into a module, build our Zig program and link them all together.</li>
+</ol>
+<p>The Zig build system and pacakage manager duo can be somewhat intimidating at first; the lack of documentation so far definitely doesn't help.</p>
+<p>The <code>build.zig</code> file for this package is larger than usual due to having to translate C into a Zig module.
+Pure Zig projects typically have shorter build specifications.</p>
+<p>If you want to do things with the Zig build system, try to find examples by Andrew Kelley, the Zig creator.</p>
+<p>If you want to go further than the examples, remember that the build helper functions return values with types you can feed into other helper functions.
+Look at the <code>std.Build</code> section of the standard library docs.
+Link up return values and parameter types: all the steps, artifacts, modules, dependencies and <code>LazyPath</code>s will often narrow down your options.
+Those docs also link to implementation source code that you may want to consult.</p>
+<p>Hopefully official documentation will make scavenging types and source code like this less necessary in the future.</p>
+
+    
+  </article>
+  <nav class="bottom-nav">
+    
+    
+    
+    <p><a href="..">&LeftArrow; More Posts</a></p>
+  </nav>
+
+  <footer>
+    Made with <a href="https://www.getzola.org">Zola</a>.
+  </footer>
+</body>
+
+</html>
