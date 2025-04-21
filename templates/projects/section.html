@@ -12,8 +12,8 @@
   </p>
 
   {% for page in section.pages %}
+    <h2><a href="{{ page.path }}">{{ page.title }}</a></h2>
     <article>
-      <h2><a href="{{ page.path }}">{{ page.title }}</a></h2>
       <p>
         <strong>Role:</strong>
         {{ page.extra.role }}

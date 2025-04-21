@@ -2,8 +2,8 @@
 {% import "macros.html" as macros %}
 
 {% macro page_summary(page) %}
+  <h2><a href="{{ page.path }}">{{ page.title }}</a></h2>
   <article>
-    <h2><a href="{{ page.path }}">{{ page.title }}</a></h2>
     {{ macros::page_meta(page=page) }}
     {% if page.summary %}
       {{ macros::summary_with_link(text=page.summary, link=page.path) }}
